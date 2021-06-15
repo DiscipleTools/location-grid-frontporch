@@ -2,22 +2,22 @@
 if ( !defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly.
 
 /**
- * Class Disciple_Tools_Plugin_Starter_Template_Base
+ * Class Location_Grid_Public_Porch_Base
  * Load the core post type hooks into the Disciple Tools system
  */
-class Disciple_Tools_Plugin_Starter_Template_Base extends DT_Module_Base {
+class Location_Grid_Public_Porch_Base extends DT_Module_Base {
 
     /**
      * Define post type variables
      * @todo update these variables with your post_type, module key, and names.
      * @var string
      */
-    public $post_type = "starter_post_type";
+    public $post_type = "location_grid_public_porch_post_type";
     public $module = "starter_base";
     public $single_name = 'Starter';
     public $plural_name = 'Starters';
     public static function post_type(){
-        return 'starter_post_type';
+        return 'location_grid_public_porch_post_type';
     }
 
     private static $_instance = null;

@@ -23,7 +23,7 @@ add_filter( 'dt_post_type_modules', function( $modules ){
         "enabled" => true,
         "locked" => true,
         "prerequisites" => [ "contacts_base" ],
-        "post_type" => "starter_post_type",
+        "post_type" => "location_grid_public_porch_post_type",
         "description" => "Default starter functionality"
     ];
 
@@ -31,7 +31,7 @@ add_filter( 'dt_post_type_modules', function( $modules ){
 }, 20, 1 );
 
 require_once 'module-base.php';
-Disciple_Tools_Plugin_Starter_Template_Base::instance();
+Location_Grid_Public_Porch_Base::instance();
 
 /**
  * @todo require_once and load additional modules
