@@ -1,5 +1,5 @@
 <?php
-class Location_Grid_Public_Porch_Example_Maps extends Location_Grid_Public_Porch_Base
+class Location_Grid_Public_Porch_Examples extends Location_Grid_Public_Porch_Base
 {
     private static $_instance = null;
     public static function instance() {
@@ -13,8 +13,8 @@ class Location_Grid_Public_Porch_Example_Maps extends Location_Grid_Public_Porch
         parent::__construct();
 
         $url = dt_get_url_path();
-        if ( ( 'example-maps' === $url ) && ! dt_is_rest() ) {
-            add_action( "template_redirect", [ $this, 'my_theme_redirect' ] );
+        if ( ( 'examples' === $url ) && ! dt_is_rest() ) {
+            add_action( "template_redirect", [ $this, 'theme_redirect' ] );
 
             add_filter( 'dt_blank_access', function(){ return true;
             } );
@@ -39,8 +39,8 @@ class Location_Grid_Public_Porch_Example_Maps extends Location_Grid_Public_Porch
     public function body(){
         require_once('parts/navigation.html')
         ?>
-        Maps
+        Example Maps
         <?php
     }
 }
-Location_Grid_Public_Porch_Example_Maps::instance();
+Location_Grid_Public_Porch_Examples::instance();

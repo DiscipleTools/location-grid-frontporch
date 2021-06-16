@@ -1,4 +1,5 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly
 
 class Location_Grid_Public_Porch_Base
 {
@@ -14,7 +15,7 @@ class Location_Grid_Public_Porch_Base
         add_filter( 'dt_non_standard_front_page', [ $this, 'dt_non_standard_front_page' ], 10, 1 );
     }
 
-    public function my_theme_redirect() {
+    public function theme_redirect() {
         $path = get_theme_file_path('template-blank.php');
         include( $path );
         die();
@@ -33,10 +34,10 @@ class Location_Grid_Public_Porch_Base
             if ( empty($current_url) ) {
                 $url = home_url( '/' );
             }
-            else if ( '/example-maps' === $current_url ) {
-                $url = home_url( '/example-maps' );
+            else if ( 'examples' === $current_url ) {
+                $url = home_url( '/examples' );
             }
-            else if ( '/projects' === $current_url ) {
+            else if ( 'projects' === $current_url ) {
                 $url = home_url( '/projects' );
             }
             else if ( 'login' === $current_url ) {

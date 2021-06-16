@@ -82,10 +82,11 @@ class Location_Grid_Public_Porch {
         require_once( 'porch/home.php');
         require_once( 'porch/facts.php');
         require_once( 'porch/projects.php');
-        require_once( 'porch/example-maps.php');
+        require_once( 'porch/examples.php');
+        require_once( 'porch/profile.php');
 
         if ( is_admin() ) {
-//            require_once( 'admin/admin-menu-and-tabs.php' ); // adds starter admin page and section for plugin
+//            require_once( 'admin/admin-menu-and-tabs.php' );
         }
 
         $this->i18n();
@@ -93,12 +94,7 @@ class Location_Grid_Public_Porch {
         if ( is_admin() ) { // adds links to the plugin description area in the plugin admin list.
             add_filter( 'plugin_row_meta', [ $this, 'plugin_description_links' ], 10, 4 );
         }
-
-
-
     }
-
-
 
     /**
      * Filters the array of row meta for each/specific plugin in the Plugins list table.
@@ -109,7 +105,7 @@ class Location_Grid_Public_Porch {
             // You can still use `array_unshift()` to add links at the beginning.
 
             $links_array[] = '<a href="https://disciple.tools">Disciple.Tools Community</a>'; // @todo replace with your links.
-            // @todo add other links here
+
         }
 
         return $links_array;

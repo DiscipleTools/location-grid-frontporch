@@ -1,20 +1,20 @@
 <?php
-class Location_Grid_Public_Porch_Home extends Location_Grid_Public_Porch_Base
+class Location_Grid_Public_Porch_Profile extends Location_Grid_Public_Porch_Base
 {
-
     private static $_instance = null;
     public static function instance() {
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
         return self::$_instance;
-    } // End instance()
+    }
 
     public function __construct() {
         parent::__construct();
 
         $url = dt_get_url_path();
-        if ( empty($url) && ! dt_is_rest() ) {
+        if ( ( 'profile' === $url ) && ! dt_is_rest() ) {
+
             add_action( "template_redirect", [ $this, 'theme_redirect' ] );
 
             add_filter( 'dt_blank_access', function(){ return true;
@@ -36,14 +36,15 @@ class Location_Grid_Public_Porch_Home extends Location_Grid_Public_Porch_Base
     }
 
     public function _browser_tab_title( $title ){
-        return 'Location Grid - Home';
+        return 'Location Grid - Profile';
     }
     public function body(){
         require_once('parts/navigation.html')
         ?>
-        Home
+        Profile<br>
+        <a href="/login/?action=logout">Logout</a>
         <?php
     }
 
 }
-Location_Grid_Public_Porch_Home::instance();
+Location_Grid_Public_Porch_Profile::instance();

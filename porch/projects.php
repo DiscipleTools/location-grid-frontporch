@@ -15,7 +15,7 @@ class Location_Grid_Public_Porch_Projects extends Location_Grid_Public_Porch_Bas
         $url = dt_get_url_path();
         if ( ( 'projects' === $url ) && ! dt_is_rest() ) {
 
-            add_action( "template_redirect", [ $this, 'my_theme_redirect' ] );
+            add_action( "template_redirect", [ $this, 'theme_redirect' ] );
 
             add_filter( 'dt_blank_access', function(){ return true;
             } );
