@@ -35,7 +35,8 @@
         <h1 class="probootstrap-heading probootstrap-animate">Location Grid Project</h1>
         <div class="probootstrap-subheading center">
           <p class="probootstrap-animate">
-              <a href="/login" target="_blank" role="button" class="btn btn-primary">Login In</a>
+              <a href="<?php echo site_url() ?>/login"  role="button" class="btn btn-primary">Log In</a>
+              <a href="<?php echo site_url() ?>/login/?action=register"  role="button" class="btn btn-primary">Register</a>
               <a href="#features" class="btn btn-default smoothscroll" role="button">See Overview</a>
           </p>
         </div>
@@ -149,7 +150,7 @@
       <div class="col-md-4">
         <div class="probootstrap-pricing">
           <h2>Starter</h2>
-          <p class="probootstrap-price"><strong>$22.99</strong></p>
+          <p class="probootstrap-price"><strong>$00.00</strong></p>
           <p class="probootstrap-note">This is a monthly recurring payment.</p>
           <ul class="probootstrap-list text-left mb50">
             <li class="probootstrap-check">Pointing has no control</li>
@@ -162,7 +163,7 @@
       <div class="col-md-4">
         <div class="probootstrap-pricing probootstrap-popular probootstrap-shadow">
           <h2>Business</h2>
-          <p class="probootstrap-price"><strong>$69.99</strong></p>
+          <p class="probootstrap-price"><strong>$00.00</strong></p>
           <p class="probootstrap-note">This is a monthly recurring payment.</p>
           <ul class="probootstrap-list text-left mb50">
             <li class="probootstrap-check">Pointing has no control</li>
@@ -175,7 +176,7 @@
       <div class="col-md-4">
         <div class="probootstrap-pricing">
           <h2>Premium</h2>
-          <p class="probootstrap-price"><strong>$224.99</strong></p>
+          <p class="probootstrap-price"><strong>$00.00</strong></p>
           <p class="probootstrap-note">This is a monthly recurring payment.</p>
           <ul class="probootstrap-list text-left mb50">
             <li class="probootstrap-check">Pointing has no control</li>

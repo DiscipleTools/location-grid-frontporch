@@ -87,6 +87,9 @@ class Location_Grid_Public_Porch {
 
         require_once('private-pages/profile.php');
 
+        require_once('admin/class-tgm-plugin-activation.php');
+        require_once('admin/config-required-plugins.php');
+
         if ( is_admin() ) {
 //            require_once( 'admin/admin-menu-and-tabs.php' );
         }
