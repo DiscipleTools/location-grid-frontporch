@@ -77,13 +77,15 @@ class Location_Grid_Public_Porch {
 
     private function __construct() {
 
-        require_once( 'porch/base.php');
+        // Register custom table for database
+        global $wpdb;
+        $wpdb->location_grid = $wpdb->prefix . 'location_grid';
 
-        require_once( 'porch/home.php');
-        require_once( 'porch/facts.php');
-        require_once( 'porch/projects.php');
-        require_once( 'porch/examples.php');
-        require_once( 'porch/profile.php');
+        // home page
+        require_once('home/base.php');
+        require_once('home/home.php');
+
+        require_once('private-pages/profile.php');
 
         if ( is_admin() ) {
 //            require_once( 'admin/admin-menu-and-tabs.php' );
@@ -120,6 +122,7 @@ class Location_Grid_Public_Porch {
      */
     public static function activation() {
         // add elements here that need to fire on activation
+        require_once( 'admin/install-table.php' );
     }
 
     /**

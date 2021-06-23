@@ -1,19 +1,21 @@
 <?php
-class Location_Grid_Public_Porch_Examples extends Location_Grid_Public_Porch_Base
+class Location_Grid_Public_Porch_Home extends Location_Grid_Public_Porch_Base
 {
+    public $token = 'location_grid_home';
+
     private static $_instance = null;
     public static function instance() {
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
         return self::$_instance;
-    }
+    } // End instance()
 
     public function __construct() {
         parent::__construct();
 
         $url = dt_get_url_path();
-        if ( ( 'examples' === $url ) && ! dt_is_rest() ) {
+        if ( empty($url) && ! dt_is_rest() ) {
             add_action( "template_redirect", [ $this, 'theme_redirect' ] );
 
             add_filter( 'dt_blank_access', function(){ return true;
@@ -31,16 +33,30 @@ class Location_Grid_Public_Porch_Examples extends Location_Grid_Public_Porch_Bas
             add_action( 'wp_print_styles', [ $this, '_print_styles' ], 1500 );
 
             add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
+
+            add_filter( 'public_porch_allowed_js', [ $this, '_allowed_js' ], 10, 1 );
+            add_filter( 'public_porch_allowed_css', [ $this, '_allowed_css' ], 10, 1 );
         }
     }
+
     public function _browser_tab_title( $title ){
-        return 'Location Grid - Maps';
+        return 'Location Grid - Home';
     }
     public function body(){
-        require_once('parts/navigation.html')
-        ?>
-        Example Maps
-        <?php
+        require_once( plugin_dir_path(__DIR__) . 'home/template.php');
+    }
+
+    public function _allowed_js( $allowed_js ) {
+        $allowed_js[] = $this->token;
+        return $allowed_js;
+    }
+
+    public function _allowed_css( $allowed_css ) {
+        $allowed_css[] = $this->token;
+        return $allowed_css;
+    }
+
+    public function scripts() {
     }
 }
-Location_Grid_Public_Porch_Examples::instance();
+Location_Grid_Public_Porch_Home::instance();
