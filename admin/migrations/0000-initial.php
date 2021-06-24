@@ -46,7 +46,7 @@ class LG_Migration_0000 extends LG_Migration {
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
         return array(
-            "{$wpdb->prefix}dt_activity_log" =>
+            "location_grid" =>
                 "CREATE TABLE IF NOT EXISTS `location_grid` (
                   `grid_id` bigint(20) NOT NULL AUTO_INCREMENT,
                   `name` varchar(200) NOT NULL DEFAULT '',
@@ -102,8 +102,9 @@ class LG_Migration_0000 extends LG_Migration {
                   KEY `level_name` (`level_name`),
                   KEY `population` (`population`),
                   FULLTEXT KEY `name` (`name`)
-                ) $charset_collate;",
-            "CREATE TABLE IF NOT EXISTS `location_grid_edit_log` (
+                 ) $charset_collate;",
+            "location_grid_edit_log" =>
+                "CREATE TABLE IF NOT EXISTS `location_grid_edit_log` (
                   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
                   `grid_id` bigint(22) DEFAULT NULL,
                   `user_id` bigint(22) DEFAULT NULL,
