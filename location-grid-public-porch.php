@@ -96,6 +96,8 @@ class Location_Grid_Public_Porch {
         $wpdb->location_grid = 'location_grid';
         $wpdb->location_grid_edit_log = 'location_grid_edit_log';
 
+        require_once( 'private-pages/queries.php');
+
         // home page
         require_once('home/home.php');
 

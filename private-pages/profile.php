@@ -24,6 +24,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     } // End instance()
 
     public function __construct() {
+
+
+
         $this->meta_key = $this->root . '_' . $this->type . '_magic_key';
         parent::__construct();
 
@@ -51,6 +54,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         $url = dt_get_url_path();
         if ( strpos( $url, $this->root . '/' . $this->type ) === false ) {
             return;
+        }
+
+        // require lo
+        if ( ! is_user_logged_in() ) {
+            wp_safe_redirect( dt_custom_login_url('login') );
         }
 
         // load if valid url
@@ -198,7 +206,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 })
             })
 
-            function load_panel( action, data ) {
+            function load_panel( action, data, title = '' ) {
                 switch (action) {
                     case 'summary':
                         load_summary(action, data)
@@ -207,7 +215,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         load_flat_grid_project(action, data)
                         break;
                     case 'flat_grid_by_country':
-                        load_flat_grid_by_country(action, data)
+                        load_flat_grid_by_country(action, data, title)
                         break;
                     case 'population_difference':
                         load_population_difference(action, data)
@@ -285,7 +293,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     </table>`)
                 let table_list = jQuery('#table-list')
                 jQuery.each( data, function(i,v){
-                    table_list.append(`<tr class="country_selection" data-id="${v.country_code}"><td>${v.name}</td><td>${v.country_code}</td><td>${v.population}</td><td>${v.sum_population}</td><td>${v.difference}</td></tr>`)
+                    table_list.append(`<tr class="country_selection" data-id="${v.country_code}" data-name="${v.name}"><td>${v.name}</td><td>${v.country_code}</td><td>${v.population}</td><td>${v.sum_population}</td><td>${v.difference}</td></tr>`)
                 })
 
                 jQuery('#summary-table').dataTable({
@@ -298,24 +306,25 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     $('#reveal-content').html(`<span class="loading-spinner active"></span>`)
                     $('#modal').foundation('open')
                     let cc = jQuery(this).data('id')
+                    let name = jQuery(this).data('name')
                     window.get_data_page( 'flat_grid_by_country', cc )
                         .done(function( data ) {
-                            load_panel( 'flat_grid_by_country', data )
+                            load_panel( 'flat_grid_by_country', data, name )
                         })
                 })
             }
-            function load_flat_grid_by_country(action, data) {
+            function load_flat_grid_by_country(action, data, title) {
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
-                    <h1>Flat Grid - <span id="country_code"></span></h1>
+                    <h1>Flat Grid - <span id="country_code">${title}</span></h1>
                     <table class="hover display" id="summary-table">
                         <thead>
                             <tr>
-                                <th>Grid ID</th>
                                 <th>Name</th>
                                 <th>Level</th>
                                 <th>Population</th>
                                 <th>Update</th>
+                                <th>Verified</th>
                             </tr>
                         </thead>
                         <tbody id="table-list"></tbody>
@@ -323,13 +332,35 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 let country_code = jQuery('#country_code')
                 let table_list = jQuery('#table-list')
                 jQuery.each( data, function(i,v){
-                    table_list.append(`<tr><td>${v.grid_id}</td><td>${v.name}</td><td>${v.level}</td><td>${v.population}</td><td><input type="text"  /></td></tr>`)
-                    country_code.html(`${v.country_code}`)
+                    table_list.append(
+                        `<tr class="${v.grid_id}">
+                            <td>${v.full_name}</td>
+                            <td>${v.level}</td>
+                            <td>${v.formatted_population}</td>
+                            <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
+                            <td></td>
+                        </tr>`
+                    )
                 })
 
                 jQuery('#summary-table').dataTable({
                     "paging": false
                 });
+
+                jQuery('.input').blur(function() {
+                    let new = jQuery(this).val()
+                    let id = jQuery(this).data('id')
+                    let old = jQuery(this).data('old')
+                    console.log(new)
+                    console.log(id)
+                    console.log(old)
+
+                    let data = {'grid_id': id, 'old_value': old, 'new_value': new }
+                    window.get_data_page('update_population', data )
+                        .done(function(result) {
+                            console.log(result)
+                        })
+                })
             }
 
 
@@ -375,205 +406,40 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
         switch ( $action ) {
             case 'summary':
-                return $this->summary();
+                return Location_Grid_Queries::summary();
             case 'flat_grid_project':
-                return $this->flat_grid_project();
+                return Location_Grid_Queries::flat_grid_fname_fpop();
             case 'flat_grid_by_country':
-                return $this->flat_grid_by_country( $params['data'] );
+                return Location_Grid_Queries::flat_grid_by_country( $params['data'] );
             case 'population_difference':
-                return $this->population_difference();
+                return Location_Grid_Queries::population_difference();
+            case 'update_population':
+                return $this->update_population( $params['data'] );
 
             default:
                 return new WP_Error( __METHOD__, "Missing valid action", [ 'status' => 400 ] );
         }
     }
 
-    public function summary() {
+    public function update_population( $data ) {
         global $wpdb;
-        $data = $wpdb->get_results("
-            SELECT
-            (SELECT g.grid_id FROM location_grid as g WHERE g.country_code = l.country_code AND level = 0 LIMIT 1) as grid_id,
-            (SELECT n.name FROM location_grid as n WHERE n.country_code = l.country_code AND level = 0 LIMIT 1) as name,
-            l.country_code,
-            l.level_name,
-            count(*) as count
-            FROM location_grid as l
-            GROUP BY l.country_code, l.level_name;
-        ", ARRAY_A );
+        if ( ! isset( $data['grid_id'], $data['new_value'], $data['old_value'] ) ) {
+            return new WP_Error( __METHOD__, "Missing parameters", [ 'status' => 400 ] );
+        }
 
-        return $data;
-    }
+        $user_id = get_current_user_id();
+        if ( empty( $user_id ) ) {
+            return new WP_Error( __METHOD__, "Missing user id", [ 'status' => 400 ] );
+        }
 
-    public function flat_grid_project() {
-        global $wpdb;
-        $data = $wpdb->get_results("
-            SELECT
-            lg1.grid_id, lg1.population, lg1.name, lg1.country_code, lg1.level
-            FROM $wpdb->location_grid lg1
-            WHERE lg1.level = 0
-			AND lg1.grid_id NOT IN ( SELECT lg11.admin0_grid_id FROM $wpdb->location_grid lg11 WHERE lg11.level = 1 AND lg11.admin0_grid_id = lg1.grid_id )
- 			#'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg1.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg1.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-			# above admin 0 (22)
-
-			UNION ALL
-            --
-            # admin 1 for countries that have no level 2 (768)
-            --
-            SELECT
-            lg2.grid_id, lg2.population, lg2.name, lg2.country_code, lg2.level
-            FROM $wpdb->location_grid lg2
-            WHERE lg2.level = 1
-			AND lg2.grid_id NOT IN ( SELECT lg22.admin1_grid_id FROM $wpdb->location_grid lg22 WHERE lg22.level = 2 AND lg22.admin1_grid_id = lg2.grid_id )
-             #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg2.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg2.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-
-            UNION ALL
-			--
-            # admin 2 all countries (37100)
-            --
-			SELECT
-            lg3.grid_id, lg3.population, lg3.name, lg3.country_code, lg3.level
-            FROM $wpdb->location_grid lg3
-            WHERE lg3.level = 2
-            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg3.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg3.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-
-			UNION ALL
-            --
-            # admin 1 for little highly divided countries (352)
-            --
-            SELECT
-            lg4.grid_id, lg4.population, lg4.name, lg4.country_code, lg4.level
-            FROM $wpdb->location_grid lg4
-            WHERE lg4.level = 1
-            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg4.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg4.admin0_grid_id IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-
-			UNION ALL
-
- 			--
-            # admin 3 for big countries (6153)
-            --
-            SELECT
-            lg5.grid_id, lg5.population, lg5.name, lg5.country_code, lg5.level
-            FROM $wpdb->location_grid as lg5
-            WHERE
-            lg5.level = 3
-            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg5.admin0_grid_id IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg5.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-
-			# Total Records (44395)
-        ", ARRAY_A );
-
-        return $data;
-    }
-
-    public function population_difference() {
-        global $wpdb;
-        $data = $wpdb->get_results("
-            SELECT tb.name, tb.country_code, FORMAT( tb.population, 0) as population, FORMAT( tb.sum_population, 0) as sum_population, FORMAT(sum_population - population, 0) as difference
-            FROM (
-            SELECT
-            l.name,
-            l.country_code,
-            l.population,
-            (SELECT SUM(p.population) as population FROM $wpdb->location_grid p WHERE p.country_code = l.country_code GROUP BY p.country_code) as sum_population
-            FROM $wpdb->location_grid l
-            WHERE l.level = 0
-            ) as tb
-        ", ARRAY_A );
-
-        return $data;
-    }
-
-    public function flat_grid_by_country( $country_code ) {
-        global $wpdb;
-        $data = $wpdb->get_results($wpdb->prepare( "
-            SELECT
-            lg1.grid_id, FORMAT( lg1.population, 0) as population, lg1.name, lg1.country_code, lg1.level
-            FROM $wpdb->location_grid lg1
-            WHERE lg1.level = 0
-			AND lg1.grid_id NOT IN ( SELECT lg11.admin0_grid_id FROM $wpdb->location_grid lg11 WHERE lg11.level = 1 AND lg11.admin0_grid_id = lg1.grid_id )
- 			#'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg1.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg1.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-			# above admin 0 (22)
-            AND lg1.country_code = %s
-
-			UNION ALL
-            --
-            # admin 1 for countries that have no level 2 (768)
-            --
-            SELECT
-            lg2.grid_id, FORMAT( lg2.population, 0) as population, lg2.name, lg2.country_code, lg2.level
-            FROM $wpdb->location_grid lg2
-            WHERE lg2.level = 1
-			AND lg2.grid_id NOT IN ( SELECT lg22.admin1_grid_id FROM $wpdb->location_grid lg22 WHERE lg22.level = 2 AND lg22.admin1_grid_id = lg2.grid_id )
-             #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg2.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg2.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-            AND lg2.country_code = %s
+        $new_value = intval( trim( $data['new_value'] ) );
+        $old_value = intval( trim( $data['old_value'] ) );
 
 
-            UNION ALL
-			--
-            # admin 2 all countries (37100)
-            --
-			SELECT
-            lg3.grid_id, FORMAT( lg3.population, 0) as population, lg3.name, lg3.country_code, lg3.level
-            FROM $wpdb->location_grid lg3
-            WHERE lg3.level = 2
-            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg3.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg3.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-            AND lg3.country_code = %s
-
-			UNION ALL
-            --
-            # admin 1 for little highly divided countries (352)
-            --
-            SELECT
-            lg4.grid_id, FORMAT( lg4.population, 0) as population, lg4.name, lg4.country_code, lg4.level
-            FROM $wpdb->location_grid lg4
-            WHERE lg4.level = 1
-            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg4.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg4.admin0_grid_id IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-            AND lg4.country_code = %s
-
-
-			UNION ALL
-
- 			--
-            # admin 3 for big countries (6153)
-            --
-            SELECT
-            lg5.grid_id, FORMAT( lg5.population, 0) as population, lg5.name, lg5.country_code, lg5.level
-            FROM $wpdb->location_grid as lg5
-            WHERE
-            lg5.level = 3
-            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
-            AND lg5.admin0_grid_id IN (100050711,100219347, 100089589,100074576,100259978,100018514)
-            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
-            AND lg5.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-            AND lg5.country_code = %s
-			# Total Records (44395)
-        ", $country_code, $country_code, $country_code, $country_code, $country_code ), ARRAY_A );
+        $result = $wpdb->query( $wpdb->prepare("
+            INSERT INTO location_grid_edit_log (grid_id, user_id, type, subtype, old_value, new_value )
+            VALUES (%d, %d, 'population', 'flat_grid_project', 5909700, 10000 );
+        ", $data['grid_id'], $user_id, $old_value, $new_value ) );
 
         return $data;
     }
