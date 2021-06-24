@@ -455,8 +455,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             return new WP_Error( __METHOD__, "Missing user id", [ 'status' => 400 ] );
         }
 
-        $new_value = intval( trim( $data['new_value'] ) );
-        $old_value = intval( trim( $data['old_value'] ) );
+        $new_value = intval( str_replace( ',', '', trim( $data['new_value'] ) ) );
+        $old_value = intval( str_replace( ',', '', trim( $data['old_value'] ) ) );
         $timestamp = time();
 
         $result = $wpdb->query( $wpdb->prepare("
