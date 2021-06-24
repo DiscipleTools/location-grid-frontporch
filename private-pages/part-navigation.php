@@ -1,4 +1,4 @@
-<div class="grid-x grid-padding-x" style="padding-top:1em; padding-bottom: 0;">
+<div class="grid-x grid-padding-x" style="padding-bottom: 0;">
     <div class="cell center">
         <ul>
             <li style="display: inline;"><a href="/">Home</a></li> |

@@ -5,7 +5,6 @@ LG_Public_Porch_Profile::instance();
 
 class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
-
     public $magic = false;
     public $parts = false;
     public $page_title = 'Profile';
@@ -13,6 +12,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     public $type = 'profile';
     public $post_type = 'contacts';
     private $meta_key = '';
+    public $allowed_scripts = ['datatables'];
+    public $allowed_styles = ['datatables'];
 
     private static $_instance = null;
     public static function instance() {
@@ -29,15 +30,20 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         /**
          * post type and module section
          */
-//        add_action( 'dt_details_additional_section', [ $this, 'dt_details_additional_section' ], 30, 2 );
-//        add_filter( 'dt_details_additional_tiles', [ $this, 'dt_details_additional_tiles' ], 10, 2 );
         add_action( 'rest_api_init', [ $this, 'add_endpoints' ] );
-
         /**
          * Magic Url Section
          */
         //don't load the magic link page for other urls
-        if ( !$this->check_parts_match() ){
+        // fail if not valid url
+        $this->magic = new DT_Magic_URL( $this->root );
+        $this->parts = $this->magic->parse_url_parts();
+        if ( !$this->parts ){
+            return;
+        }
+
+        // fail if does not match type
+        if ( $this->type !== $this->parts['type'] ){
             return;
         }
 
@@ -52,38 +58,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         add_action( 'dt_blank_footer', [ $this, '_footer' ] );
         add_action( 'dt_blank_body', [ $this, 'body' ] ); // body for no post key
 
-    }
+        add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
 
-    /*
-    public function dt_details_additional_tiles( $tiles, $post_type = "" ) {
-        if ( $post_type === $this->post_type ){
-            $tiles["dt_starters_magic_url"] = [
-                "label" => __( "Magic Url", 'disciple_tools' ),
-                "description" => "The Magic URL sets up a page accessible without authentication, only the link is needed. Useful for small applications liked to this record, like quick surveys or updates."
-            ];
-        }
-        return $tiles;
     }
-    public function dt_details_additional_section( $section, $post_type ) {
-        // test if campaigns post type and campaigns_app_module enabled
-        if ( $post_type === $this->post_type ) {
-            if ( 'dt_starters_magic_url' === $section ) {
-                $record = DT_Posts::get_post( $post_type, get_the_ID() );
-                if ( isset( $record[$this->meta_key] )) {
-                    $key = $record[$this->meta_key];
-                } else {
-                    $key = dt_create_unique_key();
-                    update_post_meta( get_the_ID(), $this->meta_key, $key );
-                }
-                $link = DT_Magic_URL::get_link_url( $this->root, $this->type, $key )
-                ?>
-                <p>See help <img class="dt-icon" src="<?php echo esc_html( get_template_directory_uri() . '/dt-assets/images/help.svg' ) ?>"/> for description.</p>
-                <a class="button" href="<?php echo esc_html( $link ); ?>" target="_blank">Open magic link</a>
-                <?php
-            }
-        }
-    }
-    */
 
     public function _header(){
         wp_head();
@@ -92,6 +69,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     }
     public function _footer(){
         wp_footer();
+    }
+
+    public function scripts() {
+        wp_enqueue_style( 'datatables', '//cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css' );
+        wp_enqueue_script( 'datatables', '//cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js', ['jquery'] );
     }
 
     public function header_style(){
@@ -120,11 +102,43 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             jQuery(document).ready(function(){
                 clearInterval(window.fiveMinuteTimer)
             })
+        </script>
+        <?php
+        return true;
+    }
 
-            window.get_magic = () => {
-                jQuery.ajax({
+    public function body(){
+        require_once('part-navigation.php')
+        ?>
+        <style>
+            .view-card {
+                cursor: pointer;
+            }
+        </style>
+        <div class="wrapper" style="max-width:1200px;margin: 0 auto;">
+            <div class="grid-x grid-padding-x">
+                <div class="cell">
+                    <div class="grid-x grid-padding-x">
+                        <div class="cell medium-4 view-card" data-id="summary">
+                            <div class="card">
+                                <div class="card-divider">
+                                    Summary
+                                </div>
+                                <img src="https://via.placeholder.com/150">
+                                <div class="card-section">
+                                    <p>Summary of the location grid database by country and level.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            window.get_page = (action) => {
+                return jQuery.ajax({
                     type: "POST",
-                    data: JSON.stringify({ action: 'get', parts: jsObject.parts }),
+                    data: JSON.stringify({ action: action, parts: jsObject.parts }),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     url: jsObject.root + jsObject.parts.root + '/v1/' + jsObject.parts.type,
@@ -132,53 +146,68 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         xhr.setRequestHeader('X-WP-Nonce', jsObject.nonce )
                     }
                 })
-                    .done(function(data){
-                        window.load_magic( data )
-                    })
                     .fail(function(e) {
                         console.log(e)
                         jQuery('#error').html(e)
                     })
             }
 
-            window.load_magic = ( data ) => {
-                let content = jQuery('#content')
-                let spinner = jQuery('.loading-spinner')
+            jQuery(document).ready(function($){
+                $('.view-card').on('click', function(e){
+                    // console.log(e)
+                    let action = $(this).data('id')
+                    console.log(action)
 
-                content.empty()
-                jQuery.each(data, function(i,v){
-                    content.prepend(`
-                         <div class="cell">
-                             ${v.name}
-                         </div>
-                     `)
+                    $('#reveal-content').html(`<span class="loading-spinner active"></span>`)
+                    $('#modal').foundation('open')
+
+                    window.get_page( action )
+                        .done(function( data ) {
+                            load_panel( action, data )
+                        })
                 })
+            })
 
-                spinner.removeClass('active')
+            function load_panel( action, data ) {
+                let content = jQuery('#reveal-content')
+
+                switch( action ) {
+                    case 'summary':
+                        content.empty().html(`
+                        <h1>Summary of the Location Grid Database</h1>
+                        <table class="hover display" id="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Grid ID</th>
+                                    <th>Name</th>
+                                    <th>Country Code</th>
+                                    <th>Level</th>
+                                    <th>Records</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-list"></tbody>
+                        </table>`)
+                        let table_list = jQuery('#table-list')
+                        jQuery.each( data, function(i,v){
+                            table_list.append(`<tr><td>${v.grid_id}</td><td>${v.name}</td><td>${v.country_code}</td><td>${v.level_name}</td><td>${v.count}</td></tr>`)
+                        })
+
+                        jQuery('#summary-table').dataTable({
+                            "paging": false
+                        });
+
+                        break;
+                }
+
 
             }
         </script>
-        <?php
-        return true;
-    }
-
-    public function body(){
-        ?>
-        <div id="custom-style"></div>
-        <div id="wrapper">
-            <div class="grid-x">
-                <div class="cell center">
-                    <h2 id="title">Title</h2>
-                </div>
-            </div>
-            <hr>
-            <div class="grid-x" id="content"><span class="loading-spinner active"></span><!-- javascript container --></div>
+        <div class="reveal full" id="modal" data-reveal>
+            <div id="reveal-content"></div>
+            <button class="close-button" data-close aria-label="Close modal" type="button">
+                <span aria-hidden="true">Close &times;</span>
+            </button>
         </div>
-        <script>
-            jQuery(document).ready(function($){
-                window.get_magic()
-            })
-        </script>
         <?php
     }
 
@@ -194,8 +223,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     'methods'  => "POST",
                     'callback' => [ $this, 'endpoint' ],
                     'permission_callback' => function( WP_REST_Request $request ){
-                        $magic = new DT_Magic_URL( $this->root );
-                        return $magic->verify_rest_endpoint_permissions_on_post( $request );
+                        return true;
                     },
                 ],
             ]
@@ -211,24 +239,28 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
         $params = dt_recursive_sanitize_array( $params );
         $action = sanitize_text_field( wp_unslash( $params['action'] ) );
-        $post_id = $params["parts"]["post_id"];
 
         switch ( $action ) {
-            case 'get':
-                return $this->endpoint_get();
-
-            // add other cases
+            case 'summary':
+                return $this->summary();
 
             default:
                 return new WP_Error( __METHOD__, "Missing valid action", [ 'status' => 400 ] );
         }
     }
 
-    public function endpoint_get() {
-        $data = [];
-
-        $data[] = [ 'name' => 'List item' ]; // @todo remove example
-        $data[] = [ 'name' => 'List item' ]; // @todo remove example
+    public function summary() {
+        global $wpdb;
+        $data = $wpdb->get_results("
+            SELECT
+            (SELECT g.grid_id FROM location_grid as g WHERE g.country_code = l.country_code AND level = 0 LIMIT 1) as grid_id,
+            (SELECT n.name FROM location_grid as n WHERE n.country_code = l.country_code AND level = 0 LIMIT 1) as name,
+            l.country_code,
+            l.level_name,
+            count(*) as count
+            FROM location_grid as l
+            GROUP BY l.country_code, l.level_name;
+        ", ARRAY_A );
 
         return $data;
     }

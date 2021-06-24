@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly
 //        ),
 //
  */
-function dt_register_required_plugins() {
+add_action( 'tgmpa_register', function () {
     /*
      * Array of plugin arrays. Required keys are name and slug.
      * If the source is NOT from the .org repo, then source is also required.
@@ -141,5 +141,5 @@ function dt_register_required_plugins() {
     );
 
     tgmpa( $plugins, $config );
-}
-add_action( 'tgmpa_register', 'dt_register_required_plugins' );
+    }
+);

@@ -26,8 +26,8 @@ class LG_Migration_Engine
         if ( self::$migrations !== null ) {
             return self::$migrations;
         }
-        require_once( plugin_dir_path( __DIR__ ) . "migrations/abstract.php" );
-        $filenames = scandir( plugin_dir_path( __DIR__ ) . "migrations/", SCANDIR_SORT_ASCENDING );
+        require_once( plugin_dir_path( __FILE__ ) . "migrations/abstract.php" );
+        $filenames = scandir( plugin_dir_path( __FILE__ ) . "migrations/", SCANDIR_SORT_ASCENDING );
         if ( $filenames === false ) {
             throw new Exception( "Could not scan migrations directory" );
         }
@@ -40,7 +40,7 @@ class LG_Migration_Engine
                     if ( $expected_migration_number !== $got_migration_number ) {
                         throw new Exception( sprintf( "Expected to find migration number %04d", $expected_migration_number ) );
                     }
-                    require_once( plugin_dir_path( __DIR__ ) . "migrations/$filename" );
+                    require_once( plugin_dir_path( __FILE__ ) . "migrations/$filename" );
                     $migration_name = sprintf( "LG_Migration_%04d", $got_migration_number );
                     $rv[] = new $migration_name();
                     $expected_migration_number++;
@@ -70,7 +70,7 @@ class LG_Migration_Engine
         }
 
         while ( true ) {
-            $current_migration_number = get_option( 'dt_migration_number' );
+            $current_migration_number = get_option( 'lg_public_porch_number' );
             if ( $current_migration_number === false ) {
                 $current_migration_number = -1;
             }
@@ -90,16 +90,16 @@ class LG_Migration_Engine
 
             self::sanity_check_expected_tables( $migration->get_expected_tables() );
 
-            if ( (int) get_option( 'dt_migration_lock', 0 ) ) {
+            if ( (int) get_option( 'lg_public_porch_lock', 0 ) ) {
                 throw new LG_Migration_Lock_Exception();
             }
-            update_option( 'dt_migration_lock', '1' );
+            update_option( 'lg_public_porch_lock', '1' );
 
             error_log( gmdate( " Y-m-d H:i:s T" ) . " Starting migrating to number $activating_migration_number" );
             try {
                 $migration->up();
             } catch (Throwable $e) {
-                update_option( 'dt_migrate_last_error', [
+                update_option( 'lg_public_porch_migrate_last_error', [
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),
                     'trace' => $e->getTrace(),
@@ -107,10 +107,10 @@ class LG_Migration_Engine
                 ] );
                 throw $e;
             }
-            update_option( 'dt_migration_number', (string) $activating_migration_number );
+            update_option( 'lg_public_porch_number', (string) $activating_migration_number );
             error_log( gmdate( " Y-m-d H:i:s T" ) . " Done migrating to number $activating_migration_number" );
 
-            update_option( 'dt_migration_lock', '0' );
+            update_option( 'lg_public_porch_lock', '0' );
 
             $migration->test();
         }
@@ -135,7 +135,7 @@ class LG_Migration_Engine
     }
 
     public static function get_current_db_migration(){
-        return get_option( 'dt_migration_number' );
+        return get_option( 'lg_public_porch_number' );
     }
 
 }
@@ -150,7 +150,7 @@ class LG_Migration_Lock_Exception extends Exception
          * that caused the lock never to be released. We could rely on the
          * error logs, but this is a bit more user-friendly.
          */
-        $last_migration_error = get_option( 'dt_migrate_last_error' );
+        $last_migration_error = get_option( 'lg_public_porch_migrate_last_error' );
         if ($message === null) {
             if ($last_migration_error === false) {
                 $message = "Cannot migrate, as migration lock is held";

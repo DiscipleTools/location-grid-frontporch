@@ -83,7 +83,7 @@ abstract class LG_Migration {
     }
 
     /**
-     * @throws \DT_Migration_Test_Exception Table $name not as expected, see error log.
+     * @throws \LG_Migration_Test_Exception Table $name not as expected, see error log.
      */
     protected function test_expected_tables() {
         global $wpdb;
@@ -95,7 +95,7 @@ abstract class LG_Migration {
             if ( $got_table !== $expected_table ) {
                 error_log( "Got: $got_table\n\nExpected:\n\n$expected_table\n\n" );
                 //don't throw an error. This is producing more false positives than value
-                //throw new DT_Migration_Test_Exception( "Table $name not as expected, see error log" );
+                //throw new LG_Migration_Test_Exception( "Table $name not as expected, see error log" );
             }
         }
     }
@@ -126,7 +126,7 @@ abstract class LG_Migration {
 }
 
 /**
- * Class DT_Migration_Test_Exception
+ * Class LG_Migration_Test_Exception
  */
-class DT_Migration_Test_Exception extends Exception {
+class LG_Migration_Test_Exception extends Exception {
 }

@@ -59,6 +59,20 @@ function location_grid_public_porch() {
 }
 add_action( 'after_setup_theme', 'location_grid_public_porch', 20 );
 
+add_action( 'init', function (){
+    /**
+     * We want to make sure migrations are run on updates.
+     *
+     * @see https://www.sitepoint.com/wordpress-plugin-updates-right-way/
+     */
+    try {
+        require_once( plugin_dir_path(__FILE__) . '/admin/class-migration-engine.php' );
+        LG_Migration_Engine::migrate( LG_Migration_Engine::$migration_number );
+    } catch ( Throwable $e ) {
+        new WP_Error( 'migration_error', 'Migration engine failed to migrate.', [ "message" => $e->getMessage() ] );
+    }
+} );
+
 /**
  * Singleton class for setting up the plugin.
  *
@@ -79,10 +93,10 @@ class Location_Grid_Public_Porch {
 
         // Register custom table for database
         global $wpdb;
-        $wpdb->location_grid = $wpdb->prefix . 'location_grid';
+        $wpdb->location_grid = 'location_grid';
+        $wpdb->location_grid_edit_log = 'location_grid_edit_log';
 
         // home page
-        require_once('home/base.php');
         require_once('home/home.php');
 
         require_once('private-pages/profile.php');
@@ -125,7 +139,6 @@ class Location_Grid_Public_Porch {
      */
     public static function activation() {
         // add elements here that need to fire on activation
-        require_once( 'admin/install-table.php' );
     }
 
     /**
