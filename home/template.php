@@ -36,7 +36,7 @@
           <h3 style="color:white;">a geographic framework of world locations and polygons <br>for disciple making movement saturation efforts.</h3>
         <div class="probootstrap-subheading center">
           <p class="probootstrap-animate">
-              <a href="https://github.com/DiscipleTools/location-grid-project" class="btn btn-default" role="button"><i class="icon-github"></i> See Github</a>
+              <a href="https://github.com/DiscipleTools/location-grid-project" class="btn btn-default" role="button">See Github Project <i class="icon-github-with-circle"></i></a>
           </p>
             <p>
                 <a href="<?php echo site_url() ?>/login"  role="button" class="btn btn-primary">Log In</a>
@@ -141,16 +141,16 @@
                     <div class="col-md-6">
                         <h4 class="text-black probootstrap-check-2">Location Grid List Table (14mg)</h4>
                         <p>The location grid table is a MYSQL table with 380,000 records for the administrative levels of the world. Based on the GADM polygon set. This table adds hierarchy, geonames cross-reference, bounding boxes, longitude and latitude for centerpoint, country_codes, and level descriptions.</p>
-                        <p><a href="#" class="btn btn-primary">Download</a></p>
+                        <p><a href="https://storage.googleapis.com/location-grid-source-data/location_grid.sql.zip" class="btn btn-primary">Download</a></p>
 
                         <h4 class="text-black probootstrap-check-2">Location Grid Geometry Table (1.81 GB)</h4>
                         <p>The location_grid_geometry table has all polygons for each of the 380,000 administrative units cross-referenced to the location_grid table by grid_id.</p>
-                        <p><a href="#" class="btn btn-primary">Download</a></p>
+                        <p><a href="https://storage.googleapis.com/location-grid-source-data/location_grid_geometry.sql.zip" class="btn btn-primary">Download</a></p>
                     </div>
                     <div class="col-md-6">
                         <h4 class="text-black probootstrap-check-2">GEOJSON Asset Collection (4.06 GB)</h4>
                         <p>The location grid mirror is a folder containing three folders: low, high, collection. The low and high folders contain .geojson files named by grid_id containing the polygon or multipolygon for the administrative unit and properties containing name, level names, and centerpoints. Those files in the low folder are compressed for web delivery, the high folder contains full resolution polygons. The collection folder contains .geojson files named by grid_id that contain a collection of the next level administrative polygons. i.e. the {state of colorado}.geojson file contains all the counties for Colorado in the single .geojson file. Each sub-administrative unit in the collection has properties including name, lng/lat centerpoint, and admin level data.</p>
-                        <p><a href="#" class="btn btn-primary">Download</a></p>
+                        <p><a href="https://storage.googleapis.com/location-grid-source-data/location-grid-mirror.zip" class="btn btn-primary">Download</a></p>
                     </div>
                 </div>
             </div>
