@@ -141,6 +141,17 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 </div>
                             </div>
                         </div>
+                        <div class="cell medium-4 view-card" data-id="population_by_admin_layer">
+                            <div class="card">
+                                <div class="card-divider">
+                                    Population by Layers
+                                </div>
+                                <div style="background-color: lightblue; width:100%; height: 75px;"></div>
+                                <div class="card-section">
+                                    <p>Population by admin layers.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <h2>Projects</h2>
@@ -223,6 +234,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'flat_grid_by_country':
                         load_flat_grid_by_country(action, data, title)
                         break;
+                    case 'population_by_admin_layer':
+                        load_population_by_admin_layer(action, data)
+                        break;
                     case 'population_difference':
                         load_population_difference(action, data)
                         break;
@@ -240,7 +254,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 <th>Name</th>
                                 <th>Country Code</th>
                                 <th>Level</th>
-                                <th>Records</th>
+                                <th>Divisions</th>
                             </tr>
                         </thead>
                         <tbody id="table-list"></tbody>
@@ -253,6 +267,37 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 jQuery('#summary-table').dataTable({
                     "paging": false
                 });
+            }
+
+            function load_population_by_admin_layer( action, data ) {
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <h1>Population by Admin Layer</h1>
+                    <table class="hover display" id="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Max Depth</th>
+                                <th>Admin0 Population</th>
+                                <th>Admin1 Population</th>
+                                <th>Admin2 Population</th>
+                                <th>Admin3 Population</th>
+                                <th>Admin1 Variance</th>
+                                <th>Admin2 Variance</th>
+                                <th>Admin3 Variance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-list"></tbody>
+                    </table>`)
+                let table_list = jQuery('#table-list')
+                jQuery.each( data, function(i,v){
+                    table_list.append(`<tr><th>${v.name}</th><td>${v.max_depth}</td><td>${v.admin0_population}</td><td>${v.admin1_population}</td><td>${v.admin2_population}</td><td>${v.admin3_population}</td><td>${v.admin1_variance}</td><td>${v.admin2_variance}</td><td>${v.admin3_variance}</td></tr>`)
+                })
+
+                jQuery('#summary-table').dataTable({
+                    "paging": false
+                });
+
             }
             function load_flat_grid_project(action, data) {
                 let content = jQuery('#reveal-content')
@@ -436,6 +481,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::flat_grid_by_country( $params['data'] );
             case 'population_difference':
                 return Location_Grid_Queries::population_difference();
+            case 'population_by_admin_layer':
+                return Location_Grid_Queries::population_by_admin_layer();
             case 'update_population':
                 return $this->update_population( $params['data'] );
 
