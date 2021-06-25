@@ -18,9 +18,9 @@
     <div id="navbar-collapse" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
         <li class="active"><a href="#" data-nav-section="home">Home</a></li>
-        <li><a href="#" data-nav-section="features">Overview</a></li>
-        <li><a href="#" data-nav-section="pricing">Pricing</a></li>
-        <li><a href="#" data-nav-section="reviews">Reviews</a></li>
+          <li><a href="#" data-nav-section="pricing">Free</a></li>
+          <li><a href="#" data-nav-section="features">Vision</a></li>
+        <li><a href="#" data-nav-section="project">Download</a></li>
         <li><a href="#" data-nav-section="contact">Contact</a></li>
       </ul>
     </div>
@@ -33,339 +33,132 @@
     <div class="row intro-text">
       <div class="col-md-8 col-md-offset-2 text-center">
         <h1 class="probootstrap-heading probootstrap-animate">Location Grid Project</h1>
+          <h3 style="color:white;">a geographic framework of world locations and polygons <br>for disciple making movement saturation efforts.</h3>
         <div class="probootstrap-subheading center">
           <p class="probootstrap-animate">
-              <a href="<?php echo site_url() ?>/login"  role="button" class="btn btn-primary">Log In</a>
-              <a href="<?php echo site_url() ?>/login/?action=register"  role="button" class="btn btn-primary">Register</a>
-              <a href="#features" class="btn btn-default smoothscroll" role="button">See Overview</a>
+              <a href="#features" class="btn btn-default smoothscroll" role="button">See Vision</a>
           </p>
+            <p>
+                <a href="<?php echo site_url() ?>/login"  role="button" class="btn btn-primary">Log In</a>
+                <a href="<?php echo site_url() ?>/login/?action=register"  role="button" class="btn btn-primary">Register</a>
+            </p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="probootstrap-section">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-4">
-        <div class="probootstrap-service-item probootstrap-animate" data-animate-effect="fadeIn">
-          <span class="icon icon-phone3"></span>
-          <h2>Mobile Optimize</h2>
-          <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.</p>
-          <p><a href="#" class="probootstrap-link">Learn More <i class="icon-chevron-right"></i></a></p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="probootstrap-service-item probootstrap-animate" data-animate-effect="fadeIn">
-          <span class="icon icon-wallet2"></span>
-          <h2>Increase Revenue</h2>
-          <p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-          <p><a href="#" class="probootstrap-link">Learn More <i class="icon-chevron-right"></i></a></p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="probootstrap-service-item probootstrap-animate" data-animate-effect="fadeIn">
-          <span class="icon icon-lightbulb"></span>
-          <h2>Smart Idea</h2>
-          <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-          <p><a href="#" class="probootstrap-link">Learn More <i class="icon-chevron-right"></i></a></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="probootstrap-section probootstrap-bg-light" id="features" data-section="features">
-  <div class="container">
-    <div class="row text-center mb100">
-      <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-        <h2 class="mb30 text-black probootstrap-heading">Overview</h2>
-        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-      </div>
-    </div>
-    <!-- END row -->
-    <div class="row mb100">
-      <div class="col-md-8 col-md-pull-2 probootstrap-animate">
-        <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
-      </div>
-      <div class="col-md-4 col-md-pull-1 probootstrap-section-heading">
-        <h3 class="text-primary probootstrap-heading-2">Big Benefits for Small Business</h3>
-        <p><p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p></p>
-        <ul class="probootstrap-list">
-          <li class="probootstrap-check">Pointing has no control</li>
-          <li class="probootstrap-check">A small river named Duden flows</li>
-          <li class="probootstrap-check">Roasted parts of sentences fly into your mouth</li>
-        </ul>
-      </div>
-    </div>
-    <!-- END row -->
-    <div class="row mb100">
-      <!-- <div class="col-md-8 col-md-pull-2"> -->
-      <div class="col-md-8 col-md-push-5 probootstrap-animate">
-        <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_2.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
-      </div>
-      <!-- <div class="col-md-4 col-md-pull-1"> -->
-      <div class="col-md-4 col-md-pull-8 probootstrap-section-heading">
-        <h3 class="text-primary probootstrap-heading-2">How Frame is different</h3>
-        <p><p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p></p>
-        <ul class="probootstrap-list">
-          <li class="probootstrap-check">Pointing has no control</li>
-          <li class="probootstrap-check">A small river named Duden flows</li>
-          <li class="probootstrap-check">Roasted parts of sentences fly into your mouth</li>
-        </ul>
-      </div>
-    </div>
-    <!-- END row -->
-
-    <div class="row mb100">
-      <div class="col-md-8 col-md-pull-2 probootstrap-animate">
-        <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
-      </div>
-      <div class="col-md-4 col-md-pull-1 probootstrap-section-heading">
-        <h3 class="text-primary probootstrap-heading-2">All in One Place</h3>
-        <p><p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p></p>
-        <ul class="probootstrap-list">
-          <li class="probootstrap-check">Pointing has no control</li>
-          <li class="probootstrap-check">A small river named Duden flows</li>
-          <li class="probootstrap-check">Roasted parts of sentences fly into your mouth</li>
-        </ul>
-      </div>
-    </div>
-    <!-- END row -->
-  </div>
-</section>
-<!-- END section -->
 
 <section class="probootstrap-section" data-section="pricing">
-  <div class="container">
-    <div class="row text-center mb100">
-      <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-        <h2 class="mb30 text-black probootstrap-heading">Choose the plan that’s right for your business </h2>
-        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-      </div>
+    <div class="container">
+        <div class="row text-center mb100">
+            <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+                <h2 class="mb30 text-black probootstrap-heading">The Grid is Free / Open Source</h2>
+                <p>The project is offered open source / free to the movement community. In our ambition to deliver a quality, non-propriatary mapping resource to users of Disciple.Tools, we
+                    want to offer the same asset and id base to the wider community.</p>
+            </div>
+        </div>
+
     </div>
-    <!-- END row -->
-    <div class="row">
-      <div class="col-md-4">
-        <div class="probootstrap-pricing">
-          <h2>Starter</h2>
-          <p class="probootstrap-price"><strong>$00.00</strong></p>
-          <p class="probootstrap-note">This is a monthly recurring payment.</p>
-          <ul class="probootstrap-list text-left mb50">
-            <li class="probootstrap-check">Pointing has no control</li>
-            <li class="probootstrap-check">A small river named Duden flows</li>
-            <li class="probootstrap-check">Roasted parts of sentences fly into your mouth</li>
-          </ul>
-          <p><a href="#" class="btn btn-black">Get Started</a></p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="probootstrap-pricing probootstrap-popular probootstrap-shadow">
-          <h2>Business</h2>
-          <p class="probootstrap-price"><strong>$00.00</strong></p>
-          <p class="probootstrap-note">This is a monthly recurring payment.</p>
-          <ul class="probootstrap-list text-left mb50">
-            <li class="probootstrap-check">Pointing has no control</li>
-            <li class="probootstrap-check">A small river named Duden flows</li>
-            <li class="probootstrap-check">Roasted parts of sentences fly into your mouth</li>
-          </ul>
-          <p><a href="#" class="btn btn-primary">Get Started</a></p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="probootstrap-pricing">
-          <h2>Premium</h2>
-          <p class="probootstrap-price"><strong>$00.00</strong></p>
-          <p class="probootstrap-note">This is a monthly recurring payment.</p>
-          <ul class="probootstrap-list text-left mb50">
-            <li class="probootstrap-check">Pointing has no control</li>
-            <li class="probootstrap-check">A small river named Duden flows</li>
-            <li class="probootstrap-check">Roasted parts of sentences fly into your mouth</li>
-          </ul>
-          <p><a href="#" class="btn btn-black">Get Started</a></p>
-        </div>
-      </div>
-    </div>
-  </div>
 </section>
 <!-- END section -->
 
- <section class="probootstrap-section probootstrap-bg-light" data-section="reviews">
-  <div class="container">
-    <div class="row text-center mb100">
-      <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-        <h2 class="mb30 text-black probootstrap-heading">That’s why 100,000+ Love Frame</h2>
-        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-      </div>
-    </div>
-    <!-- END row -->
-    <div class="row">
-      <div class="col-md-4 col-sm-6 col-xs-12">
-        <div class="probootstrap-testimonial">
-          <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/person_1.jpg" class="img-responsive img-circle probootstrap-author-photo" alt="Free Template by uicookies.com"></p>
-          <p class="mb10 probootstrap-rate">
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-          </p>
-          <blockquote>
-            <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-          </blockquote>
-          <p class="mb0">&mdash; Garry Alexander</p>
+
+<section class="probootstrap-section probootstrap-bg-light" id="features" data-section="features">
+    <div class="container">
+        <div class="row text-center mb100">
+            <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+                <h2 class="mb30 text-black probootstrap-heading">Vision</h2>
+                <p>The Location Grid Project offers a cross-referenced grid for reporting on movement progress across the planet, while at the same time is location sensitive for activity in dangerous or anti-christian locations and compliance with increasing privacy laws like GDPR.</p>
+                <p>The project serves to support the vision of consistently tracking church planting movement efforts globally in a way that allows networks and different organizations to share location sensitive reports to visualize and respond to areas of disciple making movement and areas where there is no disciple making movement.</p>
+                <p>The project offers a global grid of unique location ids for countries, states, and counties, longitude/latitude, populations for those administrative areas, and the supporting geojson polygon files for lightweight application display.</p>
+                <p>The polygon source data began with GADM public polygon sets and then the geojson files were generated and keyed to the grid system.</p>
+                <p>The administrative boundary information (north, south, east, west) has been generated from currently available polygons by the Location Grid Project.</p>
+                <p>Longitude and latitude centerpoint generated from the polygon data.</p>
+                <p>The hierarchy data in columns parent_id, admin0_grid_id, admin1_grid_id, admin2_grid_id, admin3_grid_id, admin4_grid_id, admin5_grid_id has been generated by the Location Grid Project.</p>
+            </div>
         </div>
-      </div>
-      <div class="col-md-4 col-sm-6 col-xs-12">
-        <div class="probootstrap-testimonial">
-          <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/person_2.jpg" class="img-responsive img-circle probootstrap-author-photo" alt="Free Template by uicookies.com"></p>
-          <p class="mb10 probootstrap-rate">
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-          </p>
-          <blockquote>
-            <p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-          </blockquote>
-          <p class="mb0">&mdash; James Robertson</p>
+        <!-- END row -->
+        <div class="row mb100">
+            <div class="col-md-8 col-md-pull-2 probootstrap-animate">
+                <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
+            </div>
+            <div class="col-md-4 col-md-pull-1 probootstrap-section-heading">
+                <h3 class="text-primary probootstrap-heading-2">List SQL table</h3>
+                <p>The location grid table is a MYSQL table with 380,000 records for the administrative levels of the world. Based on the GADM polygon set. This table adds hierarchy, geonames cross-reference, bounding boxes, longitude and latitude for centerpoint, country_codes, and level descriptions.</p>
+
+            </div>
         </div>
-      </div>
-      <div class="clearfix visible-sm-block"></div>
-      <div class="col-md-4 col-sm-6 col-xs-12">
-        <div class="probootstrap-testimonial">
-          <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/person_3.jpg" class="img-responsive img-circle probootstrap-author-photo" alt="Free Template by uicookies.com"></p>
-          <p class="mb10 probootstrap-rate">
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-          </p>
-          <blockquote>
-            <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-          </blockquote>
-          <p class="mb0">&mdash; Ben Goodrich</p>
+        <!-- END row -->
+        <div class="row mb100">
+            <!-- <div class="col-md-8 col-md-pull-2"> -->
+            <div class="col-md-8 col-md-push-5 probootstrap-animate">
+                <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_2.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
+            </div>
+            <!-- <div class="col-md-4 col-md-pull-1"> -->
+            <div class="col-md-4 col-md-pull-8 probootstrap-section-heading">
+                <h3 class="text-primary probootstrap-heading-2">Geometry SQL Table</h3>
+                <p>The location_grid_geometry table has all polygons for each of the 380,000 administrative units cross-referenced to the location_grid table by grid_id.</p>
+
+            </div>
         </div>
-      </div>
-      <div class="col-md-4 col-sm-6 col-xs-12">
-        <div class="probootstrap-testimonial">
-          <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/person_4.jpg" class="img-responsive img-circle probootstrap-author-photo" alt="Free Template by uicookies.com"></p>
-          <p class="mb10 probootstrap-rate">
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star-outlined"></i>
-          </p>
-          <blockquote>
-            <p>And if she hasn’t been rewritten, then they are still using her.</p>
-          </blockquote>
-          <p class="mb0">&mdash; Kip Hugh</p>
+        <!-- END row -->
+
+        <div class="row mb100">
+            <div class="col-md-8 col-md-pull-2 probootstrap-animate">
+                <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
+            </div>
+            <div class="col-md-4 col-md-pull-1 probootstrap-section-heading">
+                <h3 class="text-primary probootstrap-heading-2">Asset Mirror</h3>
+                <p>The location grid mirror is a folder containing three folders: low, high, collection. The low and high folders contain .geojson files named by grid_id containing the polygon or multipolygon for the administrative unit and properties containing name, level names, and centerpoints. Those files in the low folder are compressed for web delivery, the high folder contains full resolution polygons. The collection folder contains .geojson files named by grid_id that contain a collection of the next level administrative polygons. i.e. the {state of colorado}.geojson file contains all the counties for Colorado in the single .geojson file. Each sub-administrative unit in the collection has properties including name, lng/lat centerpoint, and admin level data.</p>
+
+            </div>
         </div>
-      </div>
-      <div class="clearfix visible-sm-block"></div>
-      <div class="col-md-4 col-sm-6 col-xs-12">
-        <div class="probootstrap-testimonial">
-          <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/person_2.jpg" class="img-responsive img-circle probootstrap-author-photo" alt="Free Template by uicookies.com"></p>
-          <p class="mb10 probootstrap-rate">
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-          </p>
-          <blockquote>
-            <p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
-          </blockquote>
-          <p class="mb0">&mdash; James Robertson</p>
-        </div>
-      </div>
-      <div class="col-md-4 col-sm-6 col-xs-12">
-        <div class="probootstrap-testimonial">
-          <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/person_3.jpg" class="img-responsive img-circle probootstrap-author-photo" alt="Free Template by uicookies.com"></p>
-          <p class="mb10 probootstrap-rate">
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-            <i class="icon-star"></i>
-          </p>
-          <blockquote>
-            <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-          </blockquote>
-          <p class="mb0">&mdash; Ben Goodrich</p>
-        </div>
-      </div>
+        <!-- END row -->
 
     </div>
-  </div>
 </section>
+<!-- END section -->
 
-<section class="probootstrap-section">
-  <div class="container">
-     <div class="row text-center mb100">
-      <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-        <h2 class="mb30 text-black probootstrap-heading">Try It Today</h2>
-        <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
-        <p><a href="#" class="btn btn-primary">Get It Now</a></p>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-12">
-            <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/laptop_1.jpg" alt="Free Template by uicookies.com" class="img-responsive"></p>
-          </div>
+
+
+<section class="probootstrap-section" data-section="project">
+    <div class="container">
+        <div class="row text-center mb100">
+            <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+                <h2 class="mb30 text-black probootstrap-heading">Download</h2>
+                <p>The grid assets can be downloaded here. Please know these are very large files and you should consider if you have a sufficient internet connection and time before beginning download.</p>
+            </div>
         </div>
         <div class="row">
-          <div class="col-md-6">
-            <h4 class="text-black probootstrap-check-2"> What is Instant?</h4>
-            <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.</p>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/laptop_1.jpg" alt="Free Template by uicookies.com" class="img-responsive"></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class="text-black probootstrap-check-2">Location Grid List Table (14mg)</h4>
+                        <p>The location grid table is a MYSQL table with 380,000 records for the administrative levels of the world. Based on the GADM polygon set. This table adds hierarchy, geonames cross-reference, bounding boxes, longitude and latitude for centerpoint, country_codes, and level descriptions.</p>
+                        <p><a href="#" class="btn btn-primary">Download</a></p>
 
-            <h4 class="text-black probootstrap-check-2">How do I use the new features of Frame App?</h4>
-            <p>On her way she met a copy. The copy warned the Little Blind Text, that where it came from it would have been rewritten a thousand times and everything that was left from its origin would be the word "and" and the Little Blind Text should turn around and return to its own, safe country. </p>
-          </div>
-          <div class="col-md-6">
-            <h4 class="text-black probootstrap-check-2">Is this available to my country?</h4>
-            <p>The Big Oxmox advised her not to do so, because there were thousands of bad Commas, wild Question Marks and devious Semikoli, but the Little Blind Text didn’t listen. She packed her seven versalia, put her initial into the belt and made herself on the way.
-</p>
-
-            <h4 class="text-black probootstrap-check-2">I have technical problem who do I email?</h4>
-            <p>But nothing the copy said could convince her and so it didn’t take long until a few insidious Copy Writers ambushed her, made her drunk with Longe and Parole and dragged her into their agency, where they abused her for their.</p>
-          </div>
+                        <h4 class="text-black probootstrap-check-2">Location Grid Geometry Table (1.81 GB)</h4>
+                        <p>The location_grid_geometry table has all polygons for each of the 380,000 administrative units cross-referenced to the location_grid table by grid_id.</p>
+                        <p><a href="#" class="btn btn-primary">Download</a></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="text-black probootstrap-check-2">GEOJSON Asset Collection (4.06 GB)</h4>
+                        <p>The location grid mirror is a folder containing three folders: low, high, collection. The low and high folders contain .geojson files named by grid_id containing the polygon or multipolygon for the administrative unit and properties containing name, level names, and centerpoints. Those files in the low folder are compressed for web delivery, the high folder contains full resolution polygons. The collection folder contains .geojson files named by grid_id that contain a collection of the next level administrative polygons. i.e. the {state of colorado}.geojson file contains all the counties for Colorado in the single .geojson file. Each sub-administrative unit in the collection has properties including name, lng/lat centerpoint, and admin level data.</p>
+                        <p><a href="#" class="btn btn-primary">Download</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </section>
 <!-- END section -->
 
-<section class="probootstrap-section probootstrap-cta">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-8 col-md-offset-2 text-center">
-        <h2 class="probootstrap-heading">Join With Over 100K Members</h2>
-        <p class="probootstrap-sub-heading">But nothing the copy said could convince her and so it didn’t take long until a few insidious Copy Writers ambushed her, made her drunk with Longe and Parole and dragged her into their agency, where they abused her for their.</p>
-        <p><a href="#" class="btn btn-black">Get Started</a></p>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- <section class"probootstrap-section probootstrap-cta">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-6 col-md-offset-3">
-        <h2 class="probootstrap-heading">Join With Over 100K Members</h2>
-        <p class="probootstrap-sub-heading">But nothing the copy said could convince her and so it didn’t take long until a few insidious Copy Writers ambushed her, made her drunk with Longe and Parole and dragged her into their agency, where they abused her for their.</p>
-
-      </div>
-    </div>
-  </div>
-</section> -->
-<!-- END section -->
 <section class="probootstrap-section probootstrap-bg-light" data-section="contact">
   <div class="container">
     <div class="row">
@@ -393,22 +186,17 @@
         <ul class="probootstrap-contact-details">
           <li>
             <span class="text-uppercase">Email</span>
-            probootstrap@gmail.com
+
           </li>
           <li>
             <span class="text-uppercase">Phone</span>
-            +30 976 1382 9921
+
           </li>
           <li>
             <span class="text-uppercase">Fax</span>
-            +30 976 1382 9922
+
           </li>
-          <li>
-            <span class="text-uppercase">Address</span>
-            San Francisco, CA <br>
-            4th Floor8 Lower  <br>
-            San Francisco street, M1 50F
-          </li>
+
         </ul>
       </div>
     </div>
@@ -425,7 +213,7 @@
     </div>
     <div class="row">
       <div class="col-md-12">
-        &copy; 2017 <a href="https://uicookies.com/">uiCookies:Frame</a>. All Rights Reserved. <br> Designed &amp; Developed by <a href="https://uicookies.com">uicookies.com</a> <br> Demo Images by <a href="https://unsplash.com">Unsplash</a>
+        &copy; 2017 <a href="https://locationgrid.app/">locationgrid</a>. All Rights Reserved.
       </div>
     </div>
   </div>
