@@ -36,7 +36,7 @@
           <h3 style="color:white;">a geographic framework of world locations and polygons <br>for disciple making movement saturation efforts.</h3>
         <div class="probootstrap-subheading center">
           <p class="probootstrap-animate">
-              <a href="https://github.com/DiscipleTools/location-grid-project" class="btn btn-default" role="button">See Github Project <i class="icon-github-with-circle"></i></a>
+              <a href="https://github.com/DiscipleTools/location-grid-project" class="btn btn-default" role="button">See Github Project</a>
           </p>
             <p>
                 <a href="<?php echo site_url() ?>/login"  role="button" class="btn btn-primary">Log In</a>
