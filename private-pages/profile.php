@@ -367,8 +367,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             function load_flat_grid_by_country(action, data, title) {
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
-                    <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;} .verified{display:none;}</style>
-                    <h1>Flat Grid - <span id="country_code">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" onclick="jQuery('.verified').toggle()">show verified</button></h1>
+                    <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
+                    <style id="custom-style">.verified {display:none;}</style>
+                    <h1>Flat Grid - <span id="country_code">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified">show verified</button></h1>
                     <table class="hover display" id="summary-table">
                         <thead>
                             <tr>
@@ -394,12 +395,13 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                             <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
                                 <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
                             <td>${v.level}</td>
-                            <td>${v.formatted_population}</td>
+                            <td id="population_${v.grid_id}">${v.formatted_population}</td>
                             <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
                             <td id="verified_${v.grid_id}">${check}</td>
                         </tr>`
                     )
                 })
+
 
                 jQuery('#summary-table').dataTable({
                     "paging": false
@@ -427,10 +429,33 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                             if ( result.status === 'OK' ){
                                 jQuery('#'+id).addClass('verified')
                                 jQuery('#verified_'+id).html('&#9989;')
+                                jQuery('#population_'+id).html(value)
                             }
                             console.log(result)
                         })
                 })
+
+                jQuery('#show_verified').on('click', function(){
+                    if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
+                        window.show_verified = true
+                        jQuery('#custom-style').html(`.verified {display:none;}`)
+                    } else {
+                        window.show_verified = false
+                        jQuery('#custom-style').html(` `)
+                    }
+                })
+
+
+            }
+
+            window.show_verified = () => {
+                if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
+                    window.show_verified = true
+                    jQuery('#table-list tr').addClass('show')
+                } else {
+                    window.show_verified = false
+                    jQuery('#table-list tr').removeClass('show')
+                }
             }
 
         </script>
