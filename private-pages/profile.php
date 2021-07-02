@@ -152,6 +152,17 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 </div>
                             </div>
                         </div>
+                        <div class="cell medium-4 view-card" data-id="flat_grid">
+                            <div class="card">
+                                <div class="card-divider">
+                                    Flat Grid
+                                </div>
+                                <div style="background-color: lightblue; width:100%; height: 75px;"></div>
+                                <div class="card-section">
+                                    <p>Full list of the flat grid names and population</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <h2>Projects</h2>
@@ -228,8 +239,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'summary':
                         load_summary(action, data)
                         break;
-                    case 'flat_grid_project':
-                        load_flat_grid_project(action, data)
+                    case 'flat_grid':
+                        load_flat_grid(action, data)
                         break;
                     case 'flat_grid_by_country':
                         load_flat_grid_by_country(action, data, title)
@@ -299,7 +310,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 });
 
             }
-            function load_flat_grid_project(action, data) {
+
+            function load_flat_grid(action, data) {
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
                     <h1>Flat Grid</h1>
@@ -316,9 +328,13 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         <tbody id="table-list"></tbody>
                     </table>`)
                 let table_list = jQuery('#table-list')
+                let html = ''
                 jQuery.each( data, function(i,v){
-                    table_list.append(`<tr><td>${v.grid_id}</td><td>${v.name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.population}</td></tr>`)
+                    html +=  `<tr><td>${v.grid_id}</td><td>${v.full_name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.formatted_population}</td></tr>`
+                    // table_list.append(`<tr><td>${v.grid_id}</td><td>${v.full_name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.formatted_population}</td></tr>`)
                 })
+
+                table_list.append(html)
 
                 jQuery('#summary-table').dataTable({
                     "paging": false
@@ -500,8 +516,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         switch ( $action ) {
             case 'summary':
                 return Location_Grid_Queries::summary();
-            case 'flat_grid_project':
-                return Location_Grid_Queries::flat_grid_fname_fpop();
+            case 'flat_grid':
+                return Location_Grid_Queries::flat_grid_full();
             case 'flat_grid_by_country':
                 return Location_Grid_Queries::flat_grid_by_country( $params['data'] );
             case 'population_difference':
