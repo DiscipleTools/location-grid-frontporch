@@ -543,7 +543,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 })
 
                 jQuery('#summary-table').dataTable({
-                    "paging": false,
                     "columnDefs": [
                         {
                             "targets": [0],
