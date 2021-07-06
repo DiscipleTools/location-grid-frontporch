@@ -586,7 +586,7 @@ class Location_Grid_Queries {
 			LEFT JOIN wp_users u ON u.ID=gel.user_id
 			WHERE gel.type = 'population' AND gel.subtype = 'flat_grid_project'
             ORDER BY gel.timestamp DESC
-            LIMIT 5000;
+            LIMIT 20000;
         ", ARRAY_A );
 
         return $data;
