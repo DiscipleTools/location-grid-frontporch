@@ -131,14 +131,16 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'title' => 'Population Difference Project',
                         'description' => 'Shows the population difference from the country record to the flat grid calculation.',
                         'image' => '',
-                        'class' => 'lightgreen'
+                        'class' => 'lightgreen',
+                        'permissions' => []
                     ],
                     'name_verification' => [
                         'key' => 'name_verification',
                         'title' => 'Name Verification',
                         'description' => 'Verifies or updates location name for the flat grid.',
                         'image' => '',
-                        'class' => 'lightgreen'
+                        'class' => 'lightgreen',
+                        'permissions' => ['manage_options']
                     ],
                 ]
             ],
@@ -150,28 +152,32 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'title' => 'Database Modification Activity',
                         'description' => 'Activity of edits to the Location Grid database.',
                         'image' => '',
-                        'class' => 'lightblue'
+                        'class' => 'lightblue',
+                        'permissions' => []
                     ],
                     'summary' => [
                         'key' => 'summary',
                         'title' => 'Summary of Levels',
                         'description' => 'Summary of the location grid database by country and level.',
                         'image' => '',
-                        'class' => 'lightblue'
+                        'class' => 'lightblue',
+                        'permissions' => []
                     ],
                     'population_by_admin_layer' => [
                         'key' => 'population_by_admin_layer',
                         'title' => 'Population by Layers',
                         'description' => 'Population by admin layers showing current total population calculated by the layer and then the difference.',
                         'image' => '',
-                        'class' => 'lightblue'
+                        'class' => 'lightblue',
+                        'permissions' => []
                     ],
                     'flat_grid' => [
                         'key' => 'flat_grid',
                         'title' => 'Flat Grid',
                         'description' => 'Full list of the flat grid names and population.',
                         'image' => '',
-                        'class' => 'lightblue'
+                        'class' => 'lightblue',
+                        'permissions' => []
                     ],
                 ]
             ],
@@ -200,6 +206,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         <div class="grid-x grid-padding-x" data-equalizer data-equalize-on="medium">
                         <?php
                         foreach( $section['tiles'] as $key => $value ) {
+                            if ( ! empty( $value['permissions'] ) ) {
+                                $has_permissions = $this->_has_permissions( $value['permissions'] );
+                                if ( ! $has_permissions ) {
+                                    continue;
+                                }
+                            }
                             ?>
                             <div class="cell medium-4 view-card" data-id="<?php echo esc_attr( $value['key'] ) ?>">
                                 <div class="card" data-equalizer-watch>
@@ -716,6 +728,17 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             </button>
         </div>
         <?php
+    }
+
+    public function _has_permissions( array $permissions ) : bool {
+        if ( count( $permissions ) > 0 ) {
+            foreach ( $permissions as $permission ){
+                if ( current_user_can( $permission ) ){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
