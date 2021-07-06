@@ -133,6 +133,13 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'image' => '',
                         'class' => 'lightgreen'
                     ],
+                    'name_verification' => [
+                        'key' => 'name_verification',
+                        'title' => 'Name Verification',
+                        'description' => 'Verifies or updates location name for the flat grid.',
+                        'image' => '',
+                        'class' => 'lightgreen'
+                    ],
                 ]
             ],
             'explore' => [
@@ -286,6 +293,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'modification_activity':
                         load_modification_activity(action, data)
                         break;
+                    case 'name_verification':
+                        load_name_verification(action, data)
+                        break;
+                    case 'name_verification_by_country':
+                        load_name_verification_by_country(action, data, title)
+                        break;
                 }
             }
 
@@ -429,6 +442,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         })
                 })
             }
+
             function load_flat_grid_by_country(action, data, title) {
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
@@ -439,11 +453,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Links</th>
-                                <th>Level</th>
                                 <th>Population</th>
                                 <th>Update</th>
                                 <th>Verified</th>
+                                <th>Links</th>
+                                <th>Level</th>
                             </tr>
                         </thead>
                         <tbody id="table-list"></tbody>
@@ -457,12 +471,14 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     table_list.append(
                         `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}">
                             <td>${v.full_name}</td>
-                            <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
-                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
-                            <td>${v.level}</td>
+
+
                             <td id="population_${v.grid_id}">${v.formatted_population}</td>
                             <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
                             <td id="verified_${v.grid_id}">${check}</td>
+                            <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
+                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
+                            <td>${v.level}</td>
                         </tr>`
                     )
                 })
@@ -494,6 +510,124 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 jQuery('#'+id).addClass('verified')
                                 jQuery('#verified_'+id).html('&#9989;')
                                 jQuery('#population_'+id).html(value)
+                            }
+                            console.log(result)
+                        })
+                })
+
+                jQuery('#show_verified').on('click', function(){
+                    if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
+                        window.show_verified = true
+                        jQuery('#custom-style').html(`.verified {display:none;}`)
+                    } else {
+                        window.show_verified = false
+                        jQuery('#custom-style').html(` `)
+                    }
+                })
+            }
+
+            function load_name_verification(action, data) {
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <style>#summary-table tr { cursor: pointer;}</style>
+                    <h1>Name Verification</h1>
+                    <table class="hover display" id="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-list"></tbody>
+                    </table>`)
+                let table_list = jQuery('#table-list')
+                jQuery.each( data, function(i,v){
+                    table_list.append(`<tr class="country_selection" data-id="${v.country_code}" data-name="${v.name}">
+                                        <td>${v.name}</td>
+                                        </tr>`)
+                })
+
+                jQuery('#summary-table').dataTable({
+                    "paging": false,
+                });
+
+                jQuery('.country_selection').on('click', function(e){
+
+                    $('#reveal-content').html(`<span class="loading-spinner active"></span>`)
+                    $('#modal').foundation('open')
+                    let cc = jQuery(this).data('id')
+                    let name = jQuery(this).data('name')
+                    window.get_data_page( 'name_verification_by_country', cc )
+                        .done(function( data ) {
+                            load_panel( 'name_verification_by_country', data, name )
+                        })
+                })
+            }
+
+            function load_name_verification_by_country(action, data, title) {
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
+                    <style id="custom-style">.verified {display:none;}</style>
+                    <h1>Flat Grid - <span id="country_code">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified">show verified</button></h1>
+                    <table class="hover display" id="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Name</th>
+                                <th>Update</th>
+                                <th>Verified</th>
+                                <th>Level</th>
+                                <th>Links</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-list"></tbody>
+                    </table>`)
+                let table_list = jQuery('#table-list')
+                jQuery.each( data, function(i,v){
+                    let check = ''
+                    if ( v.verified !== '' ){
+                        check = '&#9989;'
+                    }
+                    table_list.append(
+                        `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}">
+                            <td>${v.full_name}</td>
+                            <td id="name_${v.grid_id}">${v.name}</td>
+                            <td><input type="text" class="input" data-id="${v.grid_id}" data-old="${v.name}" /></td>
+                            <td>${v.level}</td>
+                            <td id="verified_${v.grid_id}">${check}</td>
+                            <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
+                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
+                        </tr>`
+                    )
+                })
+
+                jQuery('#summary-table').dataTable({
+                    "paging": false
+                });
+
+                jQuery('.social-icon').on('click', function(){
+                    let url = jQuery(this).data('url')
+                    window.open( url, "_blank");
+                })
+
+                jQuery('.input').blur(function() {
+                    let value = jQuery(this).val()
+                    let id = jQuery(this).data('id')
+                    let old = jQuery(this).data('old')
+
+                    if ( value === '' || value === ' ' || value < 100 ) {
+                        return
+                    }
+
+                    jQuery('#verified_'+id).html('saving...')
+
+                    let data = {'grid_id': id, 'old_value': old, 'new_value': value }
+                    window.get_data_page('update_name', data )
+                        .done(function(result) {
+                            if ( result.status === 'OK' ){
+                                jQuery('#'+id).addClass('verified')
+                                jQuery('#verified_'+id).html('&#9989;')
+                                jQuery('#name_'+id).html(value)
                             }
                             console.log(result)
                         })
@@ -626,6 +760,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::population_by_admin_layer();
             case 'update_population':
                 return $this->update_population( $params['data'] );
+            case 'update_name':
+                return $this->update_name( $params['data'] );
+            case 'name_verification':
+                return Location_Grid_Queries::country_list();
+            case 'name_verification_by_country':
+                return Location_Grid_Queries::name_verification_by_country( $params['data'] );
             case 'modification_activity':
                 return Location_Grid_Queries::modification_activity();
 
@@ -652,6 +792,41 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         $result = $wpdb->query( $wpdb->prepare("
             INSERT INTO location_grid_edit_log (grid_id, user_id, type, subtype, old_value, new_value, timestamp )
             VALUES (%d, %d, 'population', 'flat_grid_project', %s, %s, %d );
+        ", $data['grid_id'], $user_id, $old_value, $new_value, $timestamp ) );
+
+        if ( $result ) {
+            return [
+                'status' => 'OK',
+                'result' => $result,
+                'data' => $data
+            ];
+        } else {
+            return [
+                'status' => false,
+                'result' => $result,
+                'data' => $data
+            ];
+        }
+
+    }
+    public function update_name( $data ) {
+        global $wpdb;
+        if ( ! isset( $data['grid_id'], $data['new_value'], $data['old_value'] ) ) {
+            return new WP_Error( __METHOD__, "Missing parameters", [ 'status' => 400 ] );
+        }
+
+        $user_id = get_current_user_id();
+        if ( empty( $user_id ) ) {
+            return new WP_Error( __METHOD__, "Missing user id", [ 'status' => 400 ] );
+        }
+
+        $new_value = utf8_encode( trim( $data['new_value'] ) );
+        $old_value = utf8_encode( trim( $data['old_value'] ) );
+        $timestamp = time();
+
+        $result = $wpdb->query( $wpdb->prepare("
+            INSERT INTO location_grid_edit_log (grid_id, user_id, type, subtype, old_value, new_value, timestamp )
+            VALUES (%d, %d, 'name', 'name_verification_project', %s, %s, %d );
         ", $data['grid_id'], $user_id, $old_value, $new_value, $timestamp ) );
 
         if ( $result ) {
