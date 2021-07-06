@@ -138,6 +138,13 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             'explore' => [
                 'title' => 'Explore',
                 'tiles' => [
+                    'modification_activity' => [
+                        'key' => 'modification_activity',
+                        'title' => 'Database Modification Activity',
+                        'description' => 'Activity of edits to the Location Grid database.',
+                        'image' => '',
+                        'class' => 'lightblue'
+                    ],
                     'summary' => [
                         'key' => 'summary',
                         'title' => 'Summary of Levels',
@@ -156,13 +163,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'flat_grid',
                         'title' => 'Flat Grid',
                         'description' => 'Full list of the flat grid names and population.',
-                        'image' => '',
-                        'class' => 'lightblue'
-                    ],
-                    'modification_activity' => [
-                        'key' => 'modification_activity',
-                        'title' => 'Database Modification Activity',
-                        'description' => 'Activity of edits to the Location Grid database.',
                         'image' => '',
                         'class' => 'lightblue'
                     ],
