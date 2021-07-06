@@ -91,6 +91,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 background-color: white;
                 padding: 1em;
             }
+            .view-card {
+                cursor: pointer;
+            }
         </style>
         <?php
     }
@@ -118,68 +121,97 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     }
 
     public function body(){
-        require_once('part-navigation.php')
+        require_once('part-navigation.php');
+        $tiles = [
+            'projects' => [
+                'title' => 'Projects',
+                'tiles' => [
+                    'population_difference' => [
+                        'key' => 'population_difference',
+                        'title' => 'Population Difference Project',
+                        'description' => 'Shows the population difference from the country record to the flat grid calculation.',
+                        'image' => '',
+                        'class' => 'lightgreen'
+                    ],
+                ]
+            ],
+            'explore' => [
+                'title' => 'Explore',
+                'tiles' => [
+                    'summary' => [
+                        'key' => 'summary',
+                        'title' => 'Summary of Levels',
+                        'description' => 'Summary of the location grid database by country and level.',
+                        'image' => '',
+                        'class' => 'lightblue'
+                    ],
+                    'population_by_admin_layer' => [
+                        'key' => 'population_by_admin_layer',
+                        'title' => 'Population by Layers',
+                        'description' => 'Population by admin layers showing current total population calculated by the layer and then the difference.',
+                        'image' => '',
+                        'class' => 'lightblue'
+                    ],
+                    'flat_grid' => [
+                        'key' => 'flat_grid',
+                        'title' => 'Flat Grid',
+                        'description' => 'Full list of the flat grid names and population.',
+                        'image' => '',
+                        'class' => 'lightblue'
+                    ],
+                    'modification_activity' => [
+                        'key' => 'modification_activity',
+                        'title' => 'Database Modification Activity',
+                        'description' => 'Activity of edits to the Location Grid database.',
+                        'image' => '',
+                        'class' => 'lightblue'
+                    ],
+                ]
+            ],
+
+        ]
         ?>
         <style>
-            .view-card {
-                cursor: pointer;
+            .lightblue {
+                background-color: lightblue;
+                width:100%;
+                height: 75px;
+            }
+            .lightgreen {
+                background-color: lightgreen;
+                width:100%;
+                height: 75px;
             }
         </style>
         <div class="wrapper" style="max-width:1200px;margin: 0 auto;">
             <div class="grid-x grid-padding-x">
                 <div class="cell">
-                    <h2>Explore</h2>
-                    <div class="grid-x grid-padding-x">
-                        <div class="cell medium-4 view-card" data-id="summary">
-                            <div class="card">
-                                <div class="card-divider">
-                                    Summary of Levels
-                                </div>
-                                <div style="background-color: lightblue; width:100%; height: 75px;"></div>
-                                <div class="card-section">
-                                    <p>Summary of the location grid database by country and level.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cell medium-4 view-card" data-id="population_by_admin_layer">
-                            <div class="card">
-                                <div class="card-divider">
-                                    Population by Layers
-                                </div>
-                                <div style="background-color: lightblue; width:100%; height: 75px;"></div>
-                                <div class="card-section">
-                                    <p>Population by admin layers.</p>
+                    <?php
+                    foreach( $tiles as $section ) {
+                        ?>
+                        <h2><?php echo esc_html( $section['title'] ) ?></h2>
+                        <div class="grid-x grid-padding-x" data-equalizer data-equalize-on="medium">
+                        <?php
+                        foreach( $section['tiles'] as $key => $value ) {
+                            ?>
+                            <div class="cell medium-4 view-card" data-id="<?php echo esc_attr( $value['key'] ) ?>">
+                                <div class="card" data-equalizer-watch>
+                                    <div class="card-divider">
+                                        <strong><?php echo esc_html( $value['title'] ) ?></strong>
+                                    </div>
+                                    <div class="<?php echo esc_html( $value['class'] ) ?>"></div>
+                                    <div class="card-section">
+                                        <p><?php echo esc_html( $value['description'] ) ?></p>
+                                    </div>
                                 </div>
                             </div>
+                            <?php
+                        }
+                        ?>
                         </div>
-                        <div class="cell medium-4 view-card" data-id="flat_grid">
-                            <div class="card">
-                                <div class="card-divider">
-                                    Flat Grid
-                                </div>
-                                <div style="background-color: lightblue; width:100%; height: 75px;"></div>
-                                <div class="card-section">
-                                    <p>Full list of the flat grid names and population</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h2>Projects</h2>
-                    <div class="grid-x grid-padding-x">
-                        <div class="cell medium-4 view-card" data-id="population_difference">
-                            <div class="card">
-                                <div class="card-divider">
-                                    Population Difference Project
-                                </div>
-                                <div style="background-color: lightgreen; width:100%; height: 75px;"></div>
-                                <div class="card-section">
-                                    <p>Shows the population difference from the country record to the flat grid calculation.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                        <?php
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -251,6 +283,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'population_difference':
                         load_population_difference(action, data)
                         break;
+                    case 'modification_activity':
+                        load_modification_activity(action, data)
+                        break;
                 }
             }
 
@@ -302,7 +337,16 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     </table>`)
                 let table_list = jQuery('#table-list')
                 jQuery.each( data, function(i,v){
-                    table_list.append(`<tr><th>${v.name}</th><td>${v.max_depth}</td><td>${v.admin0_population}</td><td>${v.admin1_population}</td><td>${v.admin2_population}</td><td>${v.admin3_population}</td><td>${v.admin1_variance}</td><td>${v.admin2_variance}</td><td>${v.admin3_variance}</td></tr>`)
+                    table_list.append(`<tr>
+                        <td>${v.name}</td><td>${v.max_depth}</td>
+                        <td>${numberWithCommas(v.admin0_population)}</td>
+                        <td>${numberWithCommas(v.admin1_population)}</td>
+                        <td>${numberWithCommas(v.admin2_population)}</td>
+                        <td>${numberWithCommas(v.admin3_population)}</td>
+                        <td>${numberWithCommas(v.admin1_variance)}</td>
+                        <td>${numberWithCommas(v.admin2_variance)}</td>
+                        <td>${numberWithCommas(v.admin3_variance)}</td>
+                        </tr>`)
                 })
 
                 jQuery('#summary-table').dataTable({
@@ -331,7 +375,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 let html = ''
                 jQuery.each( data, function(i,v){
                     html +=  `<tr><td>${v.grid_id}</td><td>${v.full_name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.formatted_population}</td></tr>`
-                    // table_list.append(`<tr><td>${v.grid_id}</td><td>${v.full_name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.formatted_population}</td></tr>`)
                 })
 
                 table_list.append(html)
@@ -360,7 +403,13 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     </table>`)
                 let table_list = jQuery('#table-list')
                 jQuery.each( data, function(i,v){
-                    table_list.append(`<tr class="country_selection" data-id="${v.country_code}" data-name="${v.name}"><td>${v.name}</td><td>${v.country_code}</td><td>${v.population}</td><td>${v.sum_population}</td><td>${v.difference}</td></tr>`)
+                    table_list.append(`<tr class="country_selection" data-id="${v.country_code}" data-name="${v.name}">
+                                        <td>${v.name}</td>
+                                        <td>${v.country_code}</td>
+                                        <td>${numberWithCommas(v.population)}</td>
+                                        <td>${numberWithCommas(v.sum_population)}</td>
+                                        <td>${numberWithCommas(v.difference)}</td>
+                                        </tr>`)
                 })
 
                 jQuery('#summary-table').dataTable({
@@ -418,7 +467,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     )
                 })
 
-
                 jQuery('#summary-table').dataTable({
                     "paging": false
                 });
@@ -460,8 +508,50 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         jQuery('#custom-style').html(` `)
                     }
                 })
+            }
 
+            function load_modification_activity( action, data ) {
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <h1>Modification Activity</h1>
+                        <table class="hover display" id="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Time</th>
+                                    <th>Grid ID</th>
+                                    <th>Name</th>
+                                    <th>Old Value</th>
+                                    <th>New Value</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-list"></tbody>
+                        </table>
+                `)
+                let table_list = jQuery('#table-list')
+                jQuery.each( data, function(i,v){
+                    table_list.append(`<tr>
+                            <td>${v.timestamp }</td>
+                            <td>${converTimeStamp(v.timestamp )}</td>
+                            <td>${v.grid_id}</td>
+                            <td>${v.full_name}</td>
+                            <td>${numberWithCommas(v.old_value)}</td>
+                            <td>${numberWithCommas(v.new_value)}</td>
+                            <td>${v.user_email}</td>
+                            </tr>`)
+                })
 
+                jQuery('#summary-table').dataTable({
+                    "paging": false,
+                    "columnDefs": [
+                        {
+                            "targets": [0],
+                            "visible": false,
+                            "searchable": false,
+                        }
+                    ]
+                });
             }
 
             window.show_verified = () => {
@@ -474,8 +564,18 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 }
             }
 
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            function converTimeStamp( t ){
+                let milliseconds = t * 1000
+                let dateObject = new Date(milliseconds)
+                return dateObject.toLocaleString('en-US', {timeZoneName: "short"})
+            }
+
         </script>
-        <div class="reveal full" id="modal" data-reveal>
+        <div class="reveal full" id="modal" data-v-offset="0" data-reveal>
             <div id="reveal-content"></div>
             <button class="close-button" data-close aria-label="Close modal" type="button">
                 <span aria-hidden="true">Close &times;</span>
@@ -526,6 +626,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::population_by_admin_layer();
             case 'update_population':
                 return $this->update_population( $params['data'] );
+            case 'modification_activity':
+                return Location_Grid_Queries::modification_activity();
 
             default:
                 return new WP_Error( __METHOD__, "Missing valid action", [ 'status' => 400 ] );

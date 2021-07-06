@@ -252,24 +252,29 @@ class Location_Grid_Queries {
             IF ( (SELECT lge.new_value
                   FROM location_grid_edit_log lge
                   WHERE lge.grid_id = tb.grid_id
+                  AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                   ORDER BY lge.id DESC
                   LIMIT 0,1) , (SELECT lge.new_value
                                 FROM location_grid_edit_log lge
                                 WHERE lge.grid_id = tb.grid_id
+                                AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                 ORDER BY lge.id DESC
                                 LIMIT 0,1), tb.population ) as population,
             FORMAT( IF ( (SELECT lge.new_value
                  FROM location_grid_edit_log lge
                  WHERE lge.grid_id = tb.grid_id
+                 AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                  ORDER BY lge.id DESC
                  LIMIT 0,1) , (SELECT lge.new_value
                                FROM location_grid_edit_log lge
                                WHERE lge.grid_id = tb.grid_id
+                               AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                ORDER BY lge.id DESC
                                LIMIT 0,1), tb.population ), 0 ) as formatted_population,
             IF ( (SELECT lge.new_value
                   FROM location_grid_edit_log lge
                   WHERE lge.grid_id = tb.grid_id
+                  AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                   ORDER BY lge.id DESC
                   LIMIT 0,1), 'verified', '' ) as verified
             FROM (
@@ -379,10 +384,12 @@ class Location_Grid_Queries {
                                         IF ( (SELECT lge.new_value
                                                         FROM location_grid_edit_log lge
                                                         WHERE lge.grid_id = lg1.grid_id
+                                                        AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
                                                         LIMIT 0,1), (SELECT lge.new_value
                                                                       FROM location_grid_edit_log lge
                                                                       WHERE lge.grid_id = lg1.grid_id
+                                                                      AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                                       ORDER BY lge.id DESC
                                                                       LIMIT 0,1), lg1.population ) as population,
                                         lg1.name,
@@ -405,10 +412,12 @@ class Location_Grid_Queries {
                                      lg2.grid_id, IF ( (SELECT lge.new_value
                                                         FROM location_grid_edit_log lge
                                                         WHERE lge.grid_id = lg2.grid_id
+                                                        AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
                                                         LIMIT 0,1), (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg2.grid_id
+                                                                     AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                                      ORDER BY lge.id DESC
                                                                      LIMIT 0,1), lg2.population ) as population, lg2.name, lg2.country_code, lg2.level
                                  FROM location_grid lg2
@@ -427,10 +436,12 @@ class Location_Grid_Queries {
                                      lg3.grid_id, IF ( (SELECT lge.new_value
                                                         FROM location_grid_edit_log lge
                                                         WHERE lge.grid_id = lg3.grid_id
+                                                        AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
                                                         LIMIT 0,1), (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg3.grid_id
+                                                                     AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                                      ORDER BY lge.id DESC
                                                                      LIMIT 0,1), lg3.population ) as population, lg3.name, lg3.country_code, lg3.level
                                  FROM location_grid lg3
@@ -448,10 +459,12 @@ class Location_Grid_Queries {
                                      lg4.grid_id, IF ( (SELECT lge.new_value
                                                         FROM location_grid_edit_log lge
                                                         WHERE lge.grid_id = lg4.grid_id
+                                                        AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
                                                         LIMIT 0,1), (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg4.grid_id
+                                                                     AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                                      ORDER BY lge.id DESC
                                                                      LIMIT 0,1), lg4.population ) as population, lg4.name, lg4.country_code, lg4.level
                                  FROM location_grid lg4
@@ -470,10 +483,12 @@ class Location_Grid_Queries {
                                      lg5.grid_id, IF ( (SELECT lge.new_value
                                                         FROM location_grid_edit_log lge
                                                         WHERE lge.grid_id = lg5.grid_id
+                                                        AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
                                                         LIMIT 0,1), (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg5.grid_id
+                                                                     AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                                      ORDER BY lge.id DESC
                                                                      LIMIT 0,1), lg5.population ) as population, lg5.name, lg5.country_code, lg5.level
                                  FROM location_grid as lg5
@@ -502,12 +517,12 @@ class Location_Grid_Queries {
                 tb.name,
                 max_depth,
                 tb.admin0_population,
-                IF ( tb.admin1_population, tb.admin1_population, '') as admin1_population,
+                IF ( tb.admin1_population,tb.admin1_population, '') as admin1_population,
                 IF ( tb.admin2_population, tb.admin2_population, '') as admin2_population,
                 IF ( tb.admin3_population, tb.admin3_population, '') as admin3_population,
-                IF ( tb.admin0_population - tb.admin1_population, tb.admin0_population - tb.admin1_population , '') as admin1_variance,
-                IF ( tb.admin0_population - tb.admin2_population, tb.admin0_population - tb.admin2_population , '') as admin2_variance,
-                IF ( tb.admin0_population - tb.admin3_population, tb.admin0_population - tb.admin3_population , '') as admin3_variance
+                IF ( tb.admin1_population - tb.admin0_population, tb.admin1_population - tb.admin0_population, '') as admin1_variance,
+                IF ( tb.admin2_population - tb.admin0_population, tb.admin2_population - tb.admin0_population, '') as admin2_variance,
+                IF ( tb.admin3_population - tb.admin0_population, tb.admin3_population - tb.admin0_population, '') as admin3_variance
             FROM (
             SELECT
                 l.name,
@@ -541,6 +556,37 @@ class Location_Grid_Queries {
             count(*) as count
             FROM location_grid as l
             GROUP BY l.country_code, l.level_name;
+        ", ARRAY_A );
+
+        return $data;
+    }
+
+    public static function modification_activity() {
+        global $wpdb;
+        $data = $wpdb->get_results("
+            SELECT
+            gel.grid_id,
+				gel.user_id,
+                u.user_email,
+                gel.old_value,
+                gel.new_value,
+                gel.timestamp,
+            CASE
+                WHEN lg.level = 0 THEN lg.name
+                WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                ELSE CONCAT( lga3.name, ', ', lga2.name, ', ', lga1.name, ', ', lga0.name )
+            END as full_name
+            FROM location_grid_edit_log gel
+            JOIN location_grid lg ON lg.grid_id=gel.grid_id
+            LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+            LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+            LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+            LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+			LEFT JOIN wp_users u ON u.ID=gel.user_id
+			WHERE gel.type = 'population' AND gel.subtype = 'flat_grid_project'
+            ORDER BY timestamp
+            LIMIT 5000;
         ", ARRAY_A );
 
         return $data;
