@@ -24,6 +24,8 @@
   <file>.</file>
 
   <exclude-pattern>vendor/*</exclude-pattern>
+  <exclude-pattern>admin/migrations/*</exclude-pattern>
+  <exclude-pattern>admin/require-plugins/*</exclude-pattern>
   <exclude-pattern>includes/admin/libraries/plugin-update-checker/*</exclude-pattern>
 
   <arg name="extensions" value="php,inc,lib"/>

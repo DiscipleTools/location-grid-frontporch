@@ -2,10 +2,10 @@
     <div class="cell center">
         <ul>
             <li style="display: inline;"><a href="/">Home</a></li> |
-            <?php if( is_user_logged_in() ) : ?>
+            <?php if ( is_user_logged_in() ) : ?>
                 <li style="display: inline;"><a href="/grid_app/profile">Profile</a></li> |
                 <li style="display: inline;"><a href="/login/?action=logout">Logout</a></li>
-            <?php else: ?>
+            <?php else : ?>
                 <li style="display: inline;"><a href="/login">Login</a></li>
             <?php endif; ?>
         </ul>

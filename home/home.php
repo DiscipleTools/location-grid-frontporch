@@ -1,5 +1,5 @@
 <?php
-class Location_Grid_Public_Porch_Home
+class Location_Grid_Porch_Home
 {
     public $token = 'location_grid_home';
     public $magic = false;
@@ -23,7 +23,7 @@ class Location_Grid_Public_Porch_Home
         add_action( 'rest_api_init', [ $this, 'add_api_routes' ] );
 
         $url = dt_get_url_path();
-        if ( empty($url) && ! dt_is_rest() ) {
+        if ( empty( $url ) && ! dt_is_rest() ) {
             add_action( "template_redirect", [ $this, 'theme_redirect' ] );
 
             add_filter( 'dt_blank_access', function(){ return true;
@@ -51,7 +51,7 @@ class Location_Grid_Public_Porch_Home
         return 'Location Grid - Home';
     }
     public function theme_redirect() {
-        $path = get_theme_file_path('template-blank.php');
+        $path = get_theme_file_path( 'template-blank.php' );
         include( $path );
         die();
     }
@@ -109,15 +109,16 @@ class Location_Grid_Public_Porch_Home
         <title>Location Grid</title>
         <meta name="description" content="">
         <meta name="keywords" content="">
-
-        <link rel="stylesheet" href="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>css/styles-merged.css">
-        <link rel="stylesheet" href="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>css/style.min.css">
-        <link rel="stylesheet" href="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>fonts/icomoon/style.css">
+        <?php // @phpcs:disable ?>
+        <link rel="stylesheet" href="<?php echo trailingslashit( plugin_dir_url( __FILE__ ) ) ?>css/styles-merged.css">
+        <link rel="stylesheet" href="<?php echo trailingslashit( plugin_dir_url( __FILE__ ) ) ?>css/style.min.css">
+        <link rel="stylesheet" href="<?php echo trailingslashit( plugin_dir_url( __FILE__ ) ) ?>fonts/icomoon/style.css">
 
         <!--[if lt IE 9]>
-        <script src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>js/vendor/html5shiv.min.js"></script>
-        <script src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>js/vendor/respond.min.js"></script>
+        <script src="<?php echo trailingslashit( plugin_dir_url( __FILE__ ) ) ?>js/vendor/html5shiv.min.js"></script>
+        <script src="<?php echo trailingslashit( plugin_dir_url( __FILE__ ) ) ?>js/vendor/respond.min.js"></script>
         <![endif]-->
+        <?php // @phpcs:enable ?>
         <?php
         wp_head();
         $this->header_style();
@@ -154,15 +155,15 @@ class Location_Grid_Public_Porch_Home
 
         $allowed_js = apply_filters( 'public_porch_allowed_js', [
             'jquery',
-//            'lodash',
-//            'site-js',
-//            'shared-functions',
-//            'mapbox-gl',
-//            'mapbox-cookie',
-//            'mapbox-search-widget',
-//            'google-search-widget',
-//            'jquery-cookie',
-//            'jquery-touch-punch',
+            //            'lodash',
+            //            'site-js',
+            //            'shared-functions',
+            //            'mapbox-gl',
+            //            'mapbox-cookie',
+            //            'mapbox-search-widget',
+            //            'google-search-widget',
+            //            'jquery-cookie',
+            //            'jquery-touch-punch',
         ] );
 
         global $wp_scripts;
@@ -181,8 +182,8 @@ class Location_Grid_Public_Porch_Home
         $allowed_css = apply_filters( 'public_porch_allowed_css', [
             'foundation-css',
             'jquery-ui-site-css',
-//            'site-css',
-//            'mapbox-gl-css',
+            //            'site-css',
+            //            'mapbox-gl-css',
         ] );
 
         global $wp_styles;
@@ -197,7 +198,7 @@ class Location_Grid_Public_Porch_Home
     public function header_style(){
     }
     public function body(){
-        require_once( plugin_dir_path(__DIR__) . 'home/template.php');
+        require_once( plugin_dir_path( __DIR__ ) . 'home/template.php' );
     }
 
     public function _allowed_js( $allowed_js ) {
@@ -210,4 +211,4 @@ class Location_Grid_Public_Porch_Home
         return $allowed_css;
     }
 }
-Location_Grid_Public_Porch_Home::instance();
+Location_Grid_Porch_Home::instance();

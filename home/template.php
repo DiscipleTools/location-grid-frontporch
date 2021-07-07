@@ -12,7 +12,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="<?php echo dt_custom_login_url('home' ) ?>" title="uiCookies:Frame">Location Grid</a>
+      <a class="navbar-brand" href="<?php echo esc_url( dt_custom_login_url( 'home' ) ) ?>" title="uiCookies:Frame">Location Grid</a>
     </div>
 
     <div id="navbar-collapse" class="navbar-collapse collapse">
@@ -28,7 +28,7 @@
   </div>
 </nav>
 
-<section class="probootstrap-hero prohttp://localhost/probootstrap/frame/#featuresbootstrap-slant" style="background-image: url(<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/1.jpg);" data-section="home" data-stellar-background-ratio="0.5">
+<section class="probootstrap-hero prohttp://localhost/probootstrap/frame/#featuresbootstrap-slant" style="background-image: url(<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) . 'img/1.jpg' ) ?>);" data-section="home" data-stellar-background-ratio="0.5">
   <div class="container">
     <div class="row intro-text">
       <div class="col-md-8 col-md-offset-2 text-center">
@@ -39,8 +39,8 @@
               <a href="https://github.com/DiscipleTools/location-grid-project" class="btn btn-default" role="button">See Github Project</a>
           </p>
             <p>
-                <a href="<?php echo site_url() ?>/login"  role="button" class="btn btn-primary">Log In</a>
-                <a href="<?php echo site_url() ?>/login/?action=register"  role="button" class="btn btn-primary">Register</a>
+                <a href="<?php echo esc_url( site_url() ) ?>/login"  role="button" class="btn btn-primary">Log In</a>
+                <a href="<?php echo esc_url( site_url() ) ?>/login/?action=register"  role="button" class="btn btn-primary">Register</a>
             </p>
         </div>
       </div>
@@ -81,7 +81,7 @@
         <!-- END row -->
         <div class="row mb100">
             <div class="col-md-8 col-md-pull-2 probootstrap-animate">
-                <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
+                <p><img src="<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
             </div>
             <div class="col-md-4 col-md-pull-1 probootstrap-section-heading">
                 <h3 class="text-primary probootstrap-heading-2">List SQL table</h3>
@@ -93,7 +93,7 @@
         <div class="row mb100">
             <!-- <div class="col-md-8 col-md-pull-2"> -->
             <div class="col-md-8 col-md-push-5 probootstrap-animate">
-                <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_2.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
+                <p><img src="<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) ) ?>img/img_showcase_2.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
             </div>
             <!-- <div class="col-md-4 col-md-pull-1"> -->
             <div class="col-md-4 col-md-pull-8 probootstrap-section-heading">
@@ -106,7 +106,7 @@
 
         <div class="row mb100">
             <div class="col-md-8 col-md-pull-2 probootstrap-animate">
-                <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
+                <p><img src="<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) ) ?>img/img_showcase_1.jpg" alt="Free Template by uicookies.com" class="img-responsive probootstrap-shadow"></p>
             </div>
             <div class="col-md-4 col-md-pull-1 probootstrap-section-heading">
                 <h3 class="text-primary probootstrap-heading-2">Asset Mirror</h3>
@@ -134,7 +134,7 @@
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-12">
-                        <p><img src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>img/laptop_1.jpg" alt="Free Template by uicookies.com" class="img-responsive"></p>
+                        <p><img src="<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) ) ?>img/laptop_1.jpg" alt="Free Template by uicookies.com" class="img-responsive"></p>
                     </div>
                 </div>
                 <div class="row">
@@ -220,7 +220,8 @@
 </footer>
 
 
-
-<script src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>js/scripts.min.js"></script>
-<script src="<?php echo trailingslashit( plugin_dir_url(__FILE__) ) ?>js/custom.js"></script>
+<?php // @phpcs:disable ?>
+<script src="<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) ) ?>js/scripts.min.js"></script>
+<script src="<?php echo esc_url( trailingslashit( plugin_dir_url( __FILE__ ) ) ) ?>js/custom.js"></script>
+<?php // @phpcs:enable ?>
 

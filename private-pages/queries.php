@@ -633,7 +633,7 @@ class Location_Grid_Queries {
                  ", ARRAY_A );
 
                     return $data;
-                }
+    }
 
     public static function population_by_admin_layer() {
         global $wpdb;

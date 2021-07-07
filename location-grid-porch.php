@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name: Location Grid Public Porch
- * Plugin URI: https://github.com/DiscipleTools/location-grid-public-porch
+ * Plugin Name: Location Grid - Porch
+ * Plugin URI: https://github.com/DiscipleTools/location-grid-porch
  * Description: This front porch facilitates the open source location grid public site.
- * Text Domain: location-grid-public-porch
+ * Text Domain: location-grid-porch
  * Domain Path: /languages
  * Version:  0.1
  * Author URI: https://github.com/DiscipleTools
- * GitHub Plugin URI: https://github.com/DiscipleTools/location-grid-public-porch
+ * GitHub Plugin URI: https://github.com/DiscipleTools/location-grid-porch
  * Requires at least: 4.7.0
  * (Requires 4.7+ because of the integration of the REST API at 4.7 and the security requirements of this milestone version.)
  * Tested up to: 5.6
@@ -24,14 +24,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets the instance of the `Location_Grid_Public_Porch` class.
+ * Gets the instance of the `Location_Grid_Porch` class.
  *
  * @since  0.1
  * @access public
  * @return object|bool
  */
-function location_grid_public_porch() {
-    $location_grid_public_porch_required_dt_theme_version = '1.0';
+function location_grid_porch() {
+    $location_grid_porch_required_dt_theme_version = '1.0';
     $wp_theme = wp_get_theme();
     $version = $wp_theme->version;
 
@@ -39,8 +39,8 @@ function location_grid_public_porch() {
      * Check if the Disciple.Tools theme is loaded and is the latest required version
      */
     $is_theme_dt = strpos( $wp_theme->get_template(), "disciple-tools-theme" ) !== false || $wp_theme->name === "Disciple Tools";
-    if ( $is_theme_dt && version_compare( $version, $location_grid_public_porch_required_dt_theme_version, "<" ) ) {
-        add_action( 'admin_notices', 'location_grid_public_porch_hook_admin_notice' );
+    if ( $is_theme_dt && version_compare( $version, $location_grid_porch_required_dt_theme_version, "<" ) ) {
+        add_action( 'admin_notices', 'location_grid_porch_hook_admin_notice' );
         add_action( 'wp_ajax_dismissed_notice_handler', 'dt_hook_ajax_notice_handler' );
         return false;
     }
@@ -54,10 +54,10 @@ function location_grid_public_porch() {
         require_once get_template_directory() . '/dt-core/global-functions.php';
     }
 
-    return Location_Grid_Public_Porch::instance();
+    return Location_Grid_Porch::instance();
 
 }
-add_action( 'after_setup_theme', 'location_grid_public_porch', 20 );
+add_action( 'after_setup_theme', 'location_grid_porch', 20 );
 
 add_action( 'init', function (){
     /**
@@ -66,7 +66,7 @@ add_action( 'init', function (){
      * @see https://www.sitepoint.com/wordpress-plugin-updates-right-way/
      */
     try {
-        require_once( plugin_dir_path(__FILE__) . '/admin/class-migration-engine.php' );
+        require_once( plugin_dir_path( __FILE__ ) . '/admin/class-migration-engine.php' );
         LG_Migration_Engine::migrate( LG_Migration_Engine::$migration_number );
     } catch ( Throwable $e ) {
         new WP_Error( 'migration_error', 'Migration engine failed to migrate.', [ "message" => $e->getMessage() ] );
@@ -79,7 +79,7 @@ add_action( 'init', function (){
  * @since  0.1
  * @access public
  */
-class Location_Grid_Public_Porch {
+class Location_Grid_Porch {
 
     private static $_instance = null;
     public static function instance() {
@@ -96,19 +96,15 @@ class Location_Grid_Public_Porch {
         $wpdb->location_grid = 'location_grid';
         $wpdb->location_grid_edit_log = 'location_grid_edit_log';
 
-        require_once( 'private-pages/queries.php');
+        require_once( 'private-pages/queries.php' );
 
         // home page
-        require_once('home/home.php');
+        require_once( 'home/home.php' );
 
-        require_once('private-pages/profile.php');
+        require_once( 'private-pages/profile.php' );
 
-        require_once('admin/class-tgm-plugin-activation.php');
-        require_once('admin/config-required-plugins.php');
-
-        if ( is_admin() ) {
-//            require_once( 'admin/admin-menu-and-tabs.php' );
-        }
+        require_once( 'admin/require-plugins/class-tgm-plugin-activation.php' );
+        require_once( 'admin/require-plugins/config-required-plugins.php' );
 
         $this->i18n();
 
@@ -152,7 +148,7 @@ class Location_Grid_Public_Porch {
      */
     public static function deactivation() {
         // add functions here that need to happen on deactivation
-        delete_option( 'dismissed-location-grid-public-porch' );
+        delete_option( 'dismissed-location-grid-porch' );
     }
 
     /**
@@ -163,7 +159,7 @@ class Location_Grid_Public_Porch {
      * @return void
      */
     public function i18n() {
-        $domain = 'location-grid-public-porch';
+        $domain = 'location-grid-porch';
         load_plugin_textdomain( $domain, false, trailingslashit( dirname( plugin_basename( __FILE__ ) ) ). 'languages' );
     }
 
@@ -175,7 +171,7 @@ class Location_Grid_Public_Porch {
      * @return string
      */
     public function __toString() {
-        return 'location-grid-public-porch';
+        return 'location-grid-porch';
     }
 
     /**
@@ -210,7 +206,7 @@ class Location_Grid_Public_Porch {
      * @access public
      */
     public function __call( $method = '', $args = array() ) {
-        _doing_it_wrong( "location_grid_public_porch::" . esc_html( $method ), 'Method does not exist.', '0.1' );
+        _doing_it_wrong( "location_grid_porch::" . esc_html( $method ), 'Method does not exist.', '0.1' );
         unset( $method, $args );
         return null;
     }
@@ -218,32 +214,32 @@ class Location_Grid_Public_Porch {
 
 
 // Register activation hook.
-register_activation_hook( __FILE__, [ 'Location_Grid_Public_Porch', 'activation' ] );
-register_deactivation_hook( __FILE__, [ 'Location_Grid_Public_Porch', 'deactivation' ] );
+register_activation_hook( __FILE__, [ 'Location_Grid_Porch', 'activation' ] );
+register_deactivation_hook( __FILE__, [ 'Location_Grid_Porch', 'deactivation' ] );
 
 
-if ( ! function_exists( 'location_grid_public_porch_hook_admin_notice' ) ) {
-    function location_grid_public_porch_hook_admin_notice() {
-        global $location_grid_public_porch_required_dt_theme_version;
+if ( ! function_exists( 'location_grid_porch_hook_admin_notice' ) ) {
+    function location_grid_porch_hook_admin_notice() {
+        global $location_grid_porch_required_dt_theme_version;
         $wp_theme = wp_get_theme();
         $current_version = $wp_theme->version;
         $message = "'Disciple Tools - Location Grid Public Porch' plugin requires 'Disciple Tools' theme to work. Please activate 'Disciple Tools' theme or make sure it is latest version.";
         if ( $wp_theme->get_template() === "disciple-tools-theme" ){
-            $message .= ' ' . sprintf( esc_html( 'Current Disciple Tools version: %1$s, required version: %2$s' ), esc_html( $current_version ), esc_html( $location_grid_public_porch_required_dt_theme_version ) );
+            $message .= ' ' . sprintf( esc_html( 'Current Disciple Tools version: %1$s, required version: %2$s' ), esc_html( $current_version ), esc_html( $location_grid_porch_required_dt_theme_version ) );
         }
         // Check if it's been dismissed...
-        if ( ! get_option( 'dismissed-location-grid-public-porch', false ) ) { ?>
-            <div class="notice notice-error notice-location-grid-public-porch is-dismissible" data-notice="location-grid-public-porch">
+        if ( ! get_option( 'dismissed-location-grid-porch', false ) ) { ?>
+            <div class="notice notice-error notice-location-grid-porch is-dismissible" data-notice="location-grid-porch">
                 <p><?php echo esc_html( $message );?></p>
             </div>
             <script>
                 jQuery(function($) {
-                    $( document ).on( 'click', '.notice-location-grid-public-porch .notice-dismiss', function () {
+                    $( document ).on( 'click', '.notice-location-grid-porch .notice-dismiss', function () {
                         $.ajax( ajaxurl, {
                             type: 'POST',
                             data: {
                                 action: 'dismissed_notice_handler',
-                                type: 'location-grid-public-porch',
+                                type: 'location-grid-porch',
                                 security: '<?php echo esc_html( wp_create_nonce( 'wp_rest_dismiss' ) ) ?>'
                             }
                         })
@@ -275,7 +271,7 @@ if ( ! function_exists( "dt_hook_ajax_notice_handler" )){
  * This section runs the remote plugin updating service, so you can issue distributed updates to your plugin
  *
  * @note See the instructions for version updating to understand the steps involved.
- * @link https://github.com/DiscipleTools/location-grid-public-porch/wiki/Configuring-Remote-Updating-System
+ * @link https://github.com/DiscipleTools/location-grid-porch/wiki/Configuring-Remote-Updating-System
  *
  * @todo Enable this section with your own hosted file
  * @todo An example of this file can be found in (version-control.json)
@@ -300,9 +296,9 @@ if ( ! function_exists( "dt_hook_ajax_notice_handler" )){
 //        }
 //        if ( class_exists( 'Puc_v4_Factory' ) ){
 //            Puc_v4_Factory::buildUpdateChecker(
-//                'https://raw.githubusercontent.com/DiscipleTools/location-grid-public-porch/master/version-control.json',
+//                'https://raw.githubusercontent.com/DiscipleTools/location-grid-porch/master/version-control.json',
 //                __FILE__,
-//                'location-grid-public-porch'
+//                'location-grid-porch'
 //            );
 //
 //        }

@@ -12,8 +12,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     public $type = 'profile';
     public $post_type = 'contacts';
     private $meta_key = '';
-    public $allowed_scripts = ['datatables'];
-    public $allowed_styles = ['datatables'];
+    public $allowed_scripts = [ 'datatables' ];
+    public $allowed_styles = [ 'datatables' ];
 
     private static $_instance = null;
     public static function instance() {
@@ -58,7 +58,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
         // require lo
         if ( ! is_user_logged_in() ) {
-            wp_safe_redirect( dt_custom_login_url('login') );
+            wp_safe_redirect( dt_custom_login_url( 'login' ) );
         }
 
         // load if valid url
@@ -80,8 +80,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     }
 
     public function scripts() {
-        wp_enqueue_style( 'datatables', '//cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css' );
-        wp_enqueue_script( 'datatables', '//cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js', ['jquery'] );
+        wp_enqueue_style( 'datatables', '//cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css', [], '1.10.25' );
+        wp_enqueue_script( 'datatables', '//cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js', [ 'jquery' ], '1.10.25' );
     }
 
     public function header_style(){
@@ -121,7 +121,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     }
 
     public function body(){
-        require_once('part-navigation.php');
+        require_once( 'part-navigation.php' );
         $tiles = [
             'projects' => [
                 'title' => 'Projects',
@@ -140,8 +140,16 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'description' => 'Verifies or updates location name for the flat grid.',
                         'image' => '',
                         'class' => 'lightgreen',
-                        'permissions' => ['manage_options']
+                        'permissions' => [ 'manage_options' ]
                     ],
+//                    'review_and_accept' => [ // @todo write review and accepts tools
+//                        'key' => 'review',
+//                        'title' => 'Review and Accept Changes',
+//                        'description' => 'Review and accept recent changes',
+//                        'image' => '',
+//                        'class' => 'lightgreen',
+//                        'permissions' => ['manage_options']
+//                    ],
                 ]
             ],
             'explore' => [
@@ -200,12 +208,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             <div class="grid-x grid-padding-x">
                 <div class="cell">
                     <?php
-                    foreach( $tiles as $section ) {
+                    foreach ( $tiles as $section ) {
                         ?>
                         <h2><?php echo esc_html( $section['title'] ) ?></h2>
                         <div class="grid-x grid-padding-x" data-equalizer data-equalize-on="medium">
                         <?php
-                        foreach( $section['tiles'] as $key => $value ) {
+                        foreach ( $section['tiles'] as $key => $value ) {
                             if ( ! empty( $value['permissions'] ) ) {
                                 $has_permissions = $this->_has_permissions( $value['permissions'] );
                                 if ( ! $has_permissions ) {

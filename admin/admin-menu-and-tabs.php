@@ -2,22 +2,22 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; } // Exit if accessed directly
 
 /**
- * Class Location_Grid_Public_Porch_Menu
+ * Class Location_Grid_Porch_Menu
  */
-class Location_Grid_Public_Porch_Menu {
+class Location_Grid_Porch_Menu {
 
-    public $token = 'location_grid_public_porch';
+    public $token = 'location_grid_porch';
 
     private static $_instance = null;
 
     /**
-     * Location_Grid_Public_Porch_Menu Instance
+     * Location_Grid_Porch_Menu Instance
      *
-     * Ensures only one instance of Location_Grid_Public_Porch_Menu is loaded or can be loaded.
+     * Ensures only one instance of Location_Grid_Porch_Menu is loaded or can be loaded.
      *
      * @since 0.1.0
      * @static
-     * @return Location_Grid_Public_Porch_Menu instance
+     * @return Location_Grid_Porch_Menu instance
      */
     public static function instance() {
         if ( is_null( self::$_instance ) ) {
@@ -82,11 +82,11 @@ class Location_Grid_Public_Porch_Menu {
             <?php
             switch ($tab) {
                 case "general":
-                    $object = new Location_Grid_Public_Porch_Tab_General();
+                    $object = new Location_Grid_Porch_Tab_General();
                     $object->content();
                     break;
                 case "second":
-                    $object = new Location_Grid_Public_Porch_Tab_Second();
+                    $object = new Location_Grid_Porch_Tab_Second();
                     $object->content();
                     break;
                 default:
@@ -99,7 +99,7 @@ class Location_Grid_Public_Porch_Menu {
         <?php
     }
 }
-Location_Grid_Public_Porch_Menu::instance();
+Location_Grid_Porch_Menu::instance();
 
 
 /**
@@ -476,9 +476,9 @@ class Zume_Keys_Tab
 
 
 /**
- * Class Location_Grid_Public_Porch_Tab_General
+ * Class Location_Grid_Porch_Tab_General
  */
-class Location_Grid_Public_Porch_Tab_General {
+class Location_Grid_Porch_Tab_General {
     public function content() {
         ?>
         <div class="wrap">
@@ -553,9 +553,9 @@ class Location_Grid_Public_Porch_Tab_General {
 
 
 /**
- * Class Location_Grid_Public_Porch_Tab_Second
+ * Class Location_Grid_Porch_Tab_Second
  */
-class Location_Grid_Public_Porch_Tab_Second {
+class Location_Grid_Porch_Tab_Second {
     public function content() {
         ?>
         <div class="wrap">

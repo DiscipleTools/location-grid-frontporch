@@ -2,4 +2,4 @@
 {translation-domain}-{localisation}.po
 
 ex:
-location-grid-public-porch-fr_FR.po
+location-grid-porch-fr_FR.po
