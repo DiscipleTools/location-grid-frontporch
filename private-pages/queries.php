@@ -716,6 +716,43 @@ class Location_Grid_Queries {
         return $data;
     }
 
+    public static function review_population_change_activity() {
+        global $wpdb;
+        $data = $wpdb->get_results("
+            SELECT
+            gel.id,
+            gel.grid_id,
+            gel.user_id,
+            u.user_email,
+            gel.old_value,
+            gel.new_value,
+            gel.timestamp,
+            CASE
+                WHEN lg.level = 0 THEN lg.name
+                WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                ELSE CONCAT( lga3.name, ', ', lga2.name, ', ', lga1.name, ', ', lga0.name )
+                END as full_name
+            FROM location_grid_edit_log as gel
+                INNER JOIN (
+                SELECT b.grid_id, MAX(b.id) as id
+                FROM location_grid_edit_log b
+
+                GROUP BY b.grid_id
+                ) as base ON base.id=gel.id
+            JOIN location_grid lg ON lg.grid_id=gel.grid_id
+            LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+            LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+            LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+            LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+            LEFT JOIN wp_users u ON u.ID=gel.user_id
+            WHERE gel.type = 'population' AND gel.subtype = 'flat_grid_project' AND gel.accepted IS NULL
+            ORDER BY gel.timestamp DESC
+        ", ARRAY_A );
+
+        return $data;
+    }
+
     public static function country_list() {
         global $wpdb;
         $data = $wpdb->get_results("

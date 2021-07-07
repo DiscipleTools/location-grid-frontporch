@@ -142,14 +142,14 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'class' => 'lightgreen',
                         'permissions' => [ 'manage_options' ]
                     ],
-//                    'review_and_accept' => [ // @todo write review and accepts tools
-//                        'key' => 'review',
-//                        'title' => 'Review and Accept Changes',
-//                        'description' => 'Review and accept recent changes',
-//                        'image' => '',
-//                        'class' => 'lightgreen',
-//                        'permissions' => ['manage_options']
-//                    ],
+                    'review_and_accept_population' => [
+                        'key' => 'review_and_accept_population',
+                        'title' => 'Review and Accept Population Changes',
+                        'description' => 'Review and accept outstanding population changes',
+                        'image' => '',
+                        'class' => 'lightgreen',
+                        'permissions' => [ 'manage_options' ]
+                    ],
                 ]
             ],
             'explore' => [
@@ -312,6 +312,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         break;
                     case 'modification_activity':
                         load_modification_activity(action, data)
+                        break;
+                    case 'review_and_accept_population':
+                        load_review_and_accept_population(action, data)
                         break;
                     case 'name_verification':
                         load_name_verification(action, data)
@@ -708,6 +711,115 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 });
             }
 
+            function load_review_and_accept_population( action, data ) {
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <h1>Review and Accept Population</h1>
+                        <table class="hover display" id="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Grid ID</th>
+                                    <th>Name</th>
+                                    <th>Old Value</th>
+                                    <th>New Value</th>
+                                    <th class="center">
+                                        <button id="accept-all" class="button small hollow"  value="accept">Accept All Listed Below</button>
+                                    </th>
+                                    <th>Email</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-list"></tbody>
+                        </table>
+                `)
+                let table_list = jQuery('#table-list')
+                jQuery.each( data, function(i,v){
+                    table_list.append(`<tr id="row-${v.id}" data-id="${v.id}">
+                            <td>${v.timestamp }</td>
+                            <td>${v.grid_id}</td>
+                            <td>${v.full_name}</td>
+                            <td>${numberWithCommas(v.old_value)}</td>
+                            <td>${numberWithCommas(v.new_value)}</td>
+                            <td class="center" id="buttons-${v.grid_id}">
+                                <button class="button accept" data-id="${v.id}" value="accept">Accept</button>
+                                <button class="button reject" data-id="${v.id}" value="reject">Reject</button>
+                            </td>
+                            <td>${v.user_email}</td>
+                            <td>${converTimeStamp(v.timestamp )}</td>
+                            </tr>`)
+                })
+
+                jQuery('#summary-table').dataTable({
+                    "paging": false,
+                    "order": [[ 0, "desc" ]],
+                    "columnDefs": [
+                        {
+                            "targets": [0],
+                            "visible": false,
+                            "searchable": false,
+                        }
+                    ]
+                });
+
+                jQuery('#accept-all').on('click', function(){
+
+                    let list = []
+                    jQuery.each( jQuery('#table-list tr'), function(i,v){
+                        list.push( jQuery(this).data('id')  )
+                    })
+
+                    console.log( list )
+                    window.get_data_page ( 'commit_populations_to_master', list )
+                        .done(function(response) {
+                            console.log(response)
+                            if ( response.status === 'OK' ){
+                                jQuery.each(response.result, function(i,v){
+                                    jQuery('#buttons-'+i).html('accepted')
+                                })
+                            }
+                        })
+
+                })
+
+                jQuery('.accept').on('click', function(){
+                    let button = jQuery(this)
+                    button.prop('disabled', true)
+                    let list = []
+                    list.push( button.data('id')  )
+
+                    console.log( list )
+                    window.get_data_page ( 'commit_populations_to_master', list )
+                        .done(function(response) {
+                            console.log(response)
+                            if ( response.status === 'OK' ){
+                                jQuery.each(response.result, function(i,v){
+                                    jQuery('#buttons-'+i).html('accepted')
+                                })
+                            }
+                        })
+
+                })
+
+                jQuery('.reject').on('click', function(){
+                    let button = jQuery(this)
+                    button.prop('disabled', true)
+                    let list = []
+                    let id = button.data('id')
+                    list.push(  id )
+
+                    console.log( list )
+                    window.get_data_page ( 'reject_population', list )
+                        .done(function(response) {
+                            if ( response ){
+                                jQuery('#row-'+id).hide()
+                            }
+                        })
+
+                })
+
+            }
+
             window.show_verified = () => {
                 if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
                     window.show_verified = true
@@ -799,6 +911,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::name_verification_by_country( $params['data'] );
             case 'modification_activity':
                 return Location_Grid_Queries::modification_activity();
+            case 'review_and_accept_population':
+                return Location_Grid_Queries::review_population_change_activity();
+            case 'commit_populations_to_master':
+                return $this->commit_populations_to_master( $params['data'] );
+            case 'reject_population':
+                return $this->reject_population( $params['data'] );
 
             default:
                 return new WP_Error( __METHOD__, "Missing valid action", [ 'status' => 400 ] );
@@ -872,6 +990,102 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 'result' => $result,
                 'data' => $data
             ];
+        }
+
+    }
+    public function commit_populations_to_master( $data ) {
+        global $wpdb;
+        if ( ! is_array( $data ) ) {
+            return new WP_Error( __METHOD__, "Not an array", [ 'status' => 400 ] );
+        }
+
+        $current_raw = Location_Grid_Queries::review_population_change_activity();
+        $current = [];
+        foreach ( $current_raw as $row ){
+            $current[$row['id']] = $row;
+        }
+
+        $result = [];
+        foreach ( $data as $id ) {
+
+            if ( isset( $current[$id] ) ) {
+                $population = $current[$id]['new_value'];
+                $grid_id = $current[$id]['grid_id'];
+            } else {
+                $urow = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM location_grid_edit_log WHERE id = %d", $id ), ARRAY_A );
+                if ( empty( $urow ) ) {
+                    continue;
+                } else {
+                    $population = $urow['new_value'];
+                    $grid_id = $urow['grid_id'];
+                }
+            }
+
+            $result[$grid_id] = [];
+
+            // update
+            $updated_lg = $wpdb->query( $wpdb->prepare(
+                "UPDATE location_grid SET population = %d, modification_date = %s WHERE grid_id = %d;",
+            $population, gmdate( "Y-m-d" ), $grid_id ) );
+
+            $result[$grid_id][] = $updated_lg;
+
+            // check off all matching records as accepted
+            if ( false === $updated_lg ) {
+                dt_write_log( 'FAIL Commit'. $grid_id );
+                continue;
+            }
+
+            $updated_accepted = $wpdb->query( $wpdb->prepare("UPDATE location_grid_edit_log SET accepted = 1 WHERE grid_id = %d AND type = 'population' AND subtype = 'flat_grid_project';",
+            $grid_id ) );
+
+            $result[$grid_id][] = $updated_accepted;
+
+
+            if ( false === $updated_accepted ) {
+                dt_write_log( 'FAIL Accepted '. $grid_id );
+                continue;
+            }
+        }
+
+        if ( $result ) {
+            return [
+                'status' => 'OK',
+                'result' => $result,
+                'data' => $data
+            ];
+        } else {
+            return [
+                'status' => false,
+                'result' => $result,
+                'data' => $data
+            ];
+        }
+
+    }
+    public function reject_population( $data ) {
+        global $wpdb;
+        if ( ! is_array( $data ) ) {
+            return new WP_Error( __METHOD__, "Not an array", [ 'status' => 400 ] );
+        }
+
+        $current_raw = Location_Grid_Queries::review_population_change_activity();
+        $current = [];
+        foreach ( $current_raw as $row ){
+            $current[$row['id']] = $row;
+        }
+
+        $deleted = false;
+        if ( isset( $data[0] ) && isset( $current[$data[0]] ) ) {
+            $deleted = $wpdb->query( $wpdb->prepare(
+                "DELETE FROM location_grid_edit_log WHERE id = %d;",
+            $data[0] ) );
+        }
+
+        if ( $deleted ) {
+            return $data[0];
+        } else {
+            return $deleted;
         }
 
     }
