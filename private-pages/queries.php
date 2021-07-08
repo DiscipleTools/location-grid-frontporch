@@ -254,7 +254,7 @@ class Location_Grid_Queries {
                   WHERE lge.grid_id = tb.grid_id
                   AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                   ORDER BY lge.id DESC
-                  LIMIT 0,1) , (SELECT lge.new_value
+                  LIMIT 0,1) IS NOT NULL , (SELECT lge.new_value
                                 FROM location_grid_edit_log lge
                                 WHERE lge.grid_id = tb.grid_id
                                 AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
@@ -265,7 +265,7 @@ class Location_Grid_Queries {
                  WHERE lge.grid_id = tb.grid_id
                  AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                  ORDER BY lge.id DESC
-                 LIMIT 0,1) , (SELECT lge.new_value
+                 LIMIT 0,1) IS NOT NULL , (SELECT lge.new_value
                                FROM location_grid_edit_log lge
                                WHERE lge.grid_id = tb.grid_id
                                AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
@@ -276,7 +276,7 @@ class Location_Grid_Queries {
                   WHERE lge.grid_id = tb.grid_id
                   AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                   ORDER BY lge.id DESC
-                  LIMIT 0,1), 'verified', '' ) as verified
+                  LIMIT 0,1) IS NOT NULL, 'verified', '' ) as verified
             FROM (
 
                 SELECT
@@ -516,7 +516,7 @@ class Location_Grid_Queries {
                                                         WHERE lge.grid_id = lg1.grid_id
                                                         AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
-                                                        LIMIT 0,1), (SELECT lge.new_value
+                                                        LIMIT 0,1) IS NOT NULL, (SELECT lge.new_value
                                                                       FROM location_grid_edit_log lge
                                                                       WHERE lge.grid_id = lg1.grid_id
                                                                       AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
@@ -544,7 +544,7 @@ class Location_Grid_Queries {
                                                         WHERE lge.grid_id = lg2.grid_id
                                                         AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
-                                                        LIMIT 0,1), (SELECT lge.new_value
+                                                        LIMIT 0,1) IS NOT NULL, (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg2.grid_id
                                                                      AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
@@ -568,7 +568,7 @@ class Location_Grid_Queries {
                                                         WHERE lge.grid_id = lg3.grid_id
                                                         AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
-                                                        LIMIT 0,1), (SELECT lge.new_value
+                                                        LIMIT 0,1) IS NOT NULL, (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg3.grid_id
                                                                      AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
@@ -591,7 +591,7 @@ class Location_Grid_Queries {
                                                         WHERE lge.grid_id = lg4.grid_id
                                                         AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
-                                                        LIMIT 0,1), (SELECT lge.new_value
+                                                        LIMIT 0,1) IS NOT NULL, (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg4.grid_id
                                                                      AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
@@ -615,7 +615,7 @@ class Location_Grid_Queries {
                                                         WHERE lge.grid_id = lg5.grid_id
                                                         AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'
                                                         ORDER BY lge.id DESC
-                                                        LIMIT 0,1), (SELECT lge.new_value
+                                                        LIMIT 0,1) IS NOT NULL, (SELECT lge.new_value
                                                                      FROM location_grid_edit_log lge
                                                                      WHERE lge.grid_id = lg5.grid_id
                                                                      AND lge.type = 'population' AND lge.subtype = 'flat_grid_project'

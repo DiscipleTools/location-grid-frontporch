@@ -643,7 +643,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     let id = jQuery(this).data('id')
                     let old = jQuery(this).data('old')
 
-                    if ( value === '' || value === ' ' || value < 100 ) {
+                    if ( value === '' || value === ' '  ) {
                         return
                     }
 
