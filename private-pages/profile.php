@@ -525,9 +525,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     if ( value === '' || value === ' ' ) {
                         return
                     }
-                    if ( jQuery.isNumeric(value) === false ){
-                        return;
-                    }
+                    
 
                     jQuery('#verified_'+id).html('saving...')
 
