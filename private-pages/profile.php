@@ -781,7 +781,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
                     <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
-                    <style id="custom-style">.verified {display:none;}</style>
+                    <style id="local-style">.verified {display:none;}</style>
                     <h1>Flat Grid - <span id="country_code">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified">show verified</button></h1>
                     <table class="hover display" id="summary-table">
                         <thead>
@@ -805,8 +805,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     table_list.append(
                         `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}">
                             <td>${v.full_name}</td>
-
-
                             <td id="population_${v.grid_id}">${v.formatted_population}</td>
                             <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
                             <td id="verified_${v.grid_id}">${check}</td>
@@ -853,10 +851,10 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 jQuery('#show_verified').on('click', function(){
                     if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
                         window.show_verified = true
-                        jQuery('#custom-style').html(`.verified {display:none;}`)
+                        jQuery('#local-style').html(`.verified {display:none;}`)
                     } else {
                         window.show_verified = false
-                        jQuery('#custom-style').html(` `)
+                        jQuery('#local-style').html(` `)
                     }
                 })
             }
