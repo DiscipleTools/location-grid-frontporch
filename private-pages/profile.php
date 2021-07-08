@@ -433,6 +433,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 <th>Population</th>
                                 <th>Flat Population</th>
                                 <th>Difference</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="table-list"></tbody>
@@ -445,6 +446,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                         <td>${numberWithCommas(v.population)}</td>
                                         <td>${numberWithCommas(v.sum_population)}</td>
                                         <td>${numberWithCommas(v.difference)}</td>
+                                        <td>${v.percent}%</td>
                                         </tr>`)
                 })
 
@@ -520,8 +522,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     let id = jQuery(this).data('id')
                     let old = jQuery(this).data('old')
 
-                    if ( value === '' || value === ' ' || value < 100 ) {
+                    if ( value === '' || value === ' ' ) {
                         return
+                    }
+                    if ( jQuery.isNumeric(value) === false ){
+                        return;
                     }
 
                     jQuery('#verified_'+id).html('saving...')
