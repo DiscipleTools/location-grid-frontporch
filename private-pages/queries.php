@@ -691,11 +691,12 @@ class Location_Grid_Queries {
         return $data;
     }
 
-    public static function modification_activity() {
+    public static function modification_activity( $offset ) {
         global $wpdb;
-        $data = $wpdb->get_results("
+        $data = $wpdb->get_results($wpdb->prepare( "
             SELECT
-            gel.grid_id,
+                gel.id,
+                gel.grid_id,
 				gel.user_id,
                 u.user_email,
                 gel.old_value,
@@ -715,8 +716,8 @@ class Location_Grid_Queries {
             LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
 			LEFT JOIN wp_users u ON u.ID=gel.user_id
             ORDER BY gel.timestamp DESC
-            LIMIT 20000;
-        ", ARRAY_A );
+            LIMIT 2000 OFFSET %d;
+        ", $offset) , ARRAY_A );
 
         return $data;
     }

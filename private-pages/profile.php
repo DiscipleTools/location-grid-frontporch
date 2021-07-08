@@ -94,6 +94,21 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             .view-card {
                 cursor: pointer;
             }
+            .lightblue {
+                background-color: lightblue;
+                width:100%;
+                height: 25px;
+            }
+            .lightgreen {
+                background-color: lightgreen;
+                width:100%;
+                height: 25px;
+            }
+            .lightcoral {
+                background-color: lightcoral;
+                width:100%;
+                height: 25px;
+            }
         </style>
         <?php
     }
@@ -123,8 +138,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     public function body(){
         require_once( 'part-navigation.php' );
         $tiles = [
-            'projects' => [
-                'title' => 'Projects',
+            'population_project' => [
+                'title' => 'Population Project',
+                'permissions' => ['manage_options'],
                 'tiles' => [
                     'population_difference' => [
                         'key' => 'population_difference',
@@ -134,14 +150,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'class' => 'lightgreen',
                         'permissions' => []
                     ],
-                    'name_verification' => [
-                        'key' => 'name_verification',
-                        'title' => 'Name Verification',
-                        'description' => 'Verifies or updates location name for the flat grid.',
-                        'image' => '',
-                        'class' => 'lightgreen',
-                        'permissions' => [ 'manage_options' ]
-                    ],
                     'review_and_accept_population' => [
                         'key' => 'review_and_accept_population',
                         'title' => 'Review and Accept Population Changes',
@@ -150,15 +158,30 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'class' => 'lightgreen',
                         'permissions' => [ 'manage_options' ]
                     ],
-                ]
+                ],
+            ],
+            'name_project' => [
+                'title' => 'Name Project',
+                'permissions' => ['manage_options'],
+                'tiles' => [
+                    'name_verification' => [
+                        'key' => 'name_verification',
+                        'title' => 'Name Verification',
+                        'description' => 'Verifies or updates location name for the flat grid.',
+                        'image' => '',
+                        'class' => 'lightcoral',
+                        'permissions' => [ 'manage_options' ]
+                    ],
+                ],
             ],
             'explore' => [
                 'title' => 'Explore',
+                'permissions' => [],
                 'tiles' => [
                     'modification_activity' => [
                         'key' => 'modification_activity',
-                        'title' => 'Database Modification Activity',
-                        'description' => 'Activity of edits to the Location Grid database.',
+                        'title' => 'Modification History',
+                        'description' => 'History of changes to the database.',
                         'image' => '',
                         'class' => 'lightblue',
                         'permissions' => []
@@ -187,31 +210,25 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'class' => 'lightblue',
                         'permissions' => []
                     ],
-                ]
+                ],
             ],
 
         ]
         ?>
-        <style>
-            .lightblue {
-                background-color: lightblue;
-                width:100%;
-                height: 75px;
-            }
-            .lightgreen {
-                background-color: lightgreen;
-                width:100%;
-                height: 75px;
-            }
-        </style>
         <div class="wrapper" style="max-width:1200px;margin: 0 auto;">
             <div class="grid-x grid-padding-x">
                 <div class="cell">
                     <?php
                     foreach ( $tiles as $section ) {
+                        if ( ! empty( $value['permissions'] ) ) {
+                            $has_permissions = $this->_has_permissions( $value['permissions'] );
+                            if ( ! $has_permissions ) {
+                                continue;
+                            }
+                        }
                         ?>
-                        <h2><?php echo esc_html( $section['title'] ) ?></h2>
-                        <div class="grid-x grid-padding-x" data-equalizer data-equalize-on="medium">
+                        <h2 style="padding-top:1em;"><?php echo esc_html( $section['title'] ) ?></h2>
+                        <div class="grid-x grid-padding-x" style="border-bottom: 1px solid lightgrey;padding-bottom:.5em;" data-equalizer data-equalize-on="medium">
                         <?php
                         foreach ( $section['tiles'] as $key => $value ) {
                             if ( ! empty( $value['permissions'] ) ) {
@@ -525,7 +542,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     if ( value === '' || value === ' ' ) {
                         return
                     }
-                    
+
 
                     jQuery('#verified_'+id).html('saving...')
 
@@ -673,45 +690,59 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             function load_modification_activity( action, data ) {
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
-                    <h1>Modification Activity</h1>
-                        <table class="hover display" id="summary-table">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Time</th>
-                                    <th>Grid ID</th>
-                                    <th>Name</th>
-                                    <th>Old Value</th>
-                                    <th>New Value</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-list"></tbody>
-                        </table>
-                `)
-                let table_list = jQuery('#table-list')
-                jQuery.each( data, function(i,v){
-                    table_list.append(`<tr>
-                            <td>${v.timestamp }</td>
-                            <td>${converTimeStamp(v.timestamp )}</td>
-                            <td>${v.grid_id}</td>
-                            <td>${v.full_name}</td>
-                            <td>${numberWithCommas(v.old_value)}</td>
-                            <td>${numberWithCommas(v.new_value)}</td>
-                            <td>${v.user_email}</td>
-                            </tr>`)
-                })
+                            <h1>Modification History</h1>
+                            <div class="table-scroll">
+                                <table class="hover striped" id="summary-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Time</th>
+                                            <th>Grid ID</th>
+                                            <th>Name</th>
+                                            <th>Old Value</th>
+                                            <th>New Value</th>
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-list"></tbody>
+                                </table>
+                            </div>
+                            <hr>
+                            <div class="grid-x">
+                                <div class="cell center">
+                                    <button class="button" id="load-more" disabled>Load More</button> <span class="loading-spinner active"></span>
+                                </div>
+                            </div>
+                        `)
 
-                jQuery('#summary-table').dataTable({
-                    "order": [[ 0, "desc" ]],
-                    "columnDefs": [
-                        {
-                            "targets": [0],
-                            "visible": false,
-                            "searchable": false,
-                        }
-                    ]
-                });
+                let table_list = jQuery('#table-list')
+                load_block( 0 )
+
+                function load_block( block ) {
+                    window.get_data_page ('modification_activity_block', block )
+                        .done(function(data) {
+                            jQuery.each( data, function(i,v){
+                                table_list.append(`<tr>
+                                <td>${v.id}</td>
+                                <td>${converTimeStamp(v.timestamp )}</td>
+                                <td>${v.grid_id}</td>
+                                <td>${v.full_name}</td>
+                                <td>${numberWithCommas(v.old_value)}</td>
+                                <td>${numberWithCommas(v.new_value)}</td>
+                                <td>${v.user_email}</td>
+                                </tr>`)
+                            })
+                            jQuery('#load-more').prop('disabled', false )
+                            jQuery('.loading-spinner').removeClass('active')
+                        })
+                }
+
+                jQuery('#load-more').on('click', function(){
+                    jQuery('#load-more').prop('disabled', true )
+                    jQuery('.loading-spinner').addClass('active')
+                    let list = jQuery('#table-list tr').length
+                    load_block( list + 1 )
+                })
             }
 
             function load_review_and_accept_population( action, data ) {
@@ -913,7 +944,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             case 'name_verification_by_country':
                 return Location_Grid_Queries::name_verification_by_country( $params['data'] );
             case 'modification_activity':
-                return Location_Grid_Queries::modification_activity();
+                return true; // trigger secondary
+            case 'modification_activity_block':
+                return Location_Grid_Queries::modification_activity( $params['data'] );
             case 'review_and_accept_population':
                 return Location_Grid_Queries::review_population_change_activity();
             case 'commit_populations_to_master':
