@@ -585,11 +585,7 @@ class Location_Grid_Queries {
                 FORMAT( tb.population, 0) as population,
                 FORMAT( tb.sum_population, 0) as sum_population,
                 FORMAT(sum_population - population, 0) as difference,
-                CASE
-                WHEN ( tb.sum_population / tb.population ) > 1 THEN TRUNCATE( tb.sum_population / tb.population * 100, 1 )
-                WHEN ( tb.sum_population / tb.population ) = 1 THEN 0
-                WHEN ( tb.sum_population / tb.population ) < 1 THEN TRUNCATE( ( ( 1 - ( tb.sum_population / tb.population ) ) * 100 ) * -1, 1 )
-                END as percent
+                TRUNCATE( ( ( tb.sum_population - tb.population ) / tb.population * 100 ), 1 )  as percent
             FROM (
                      SELECT
                          l.name,
