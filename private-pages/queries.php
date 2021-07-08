@@ -77,6 +77,94 @@ class Location_Grid_Queries {
         return $data;
     }
 
+    public static function flat_grid_populations() {
+        global $wpdb;
+        $data_raw = $wpdb->get_results("
+            SELECT
+            lg1.grid_id, lg1.name, lg1.population,  lg1.country_code, lg1.level
+            FROM location_grid lg1
+            WHERE lg1.level = 0
+			AND lg1.grid_id NOT IN ( SELECT lg11.admin0_grid_id FROM location_grid lg11 WHERE lg11.level = 1 AND lg11.admin0_grid_id = lg1.grid_id )
+ 			#'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
+            AND lg1.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
+            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
+            AND lg1.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
+			# above admin 0 (22)
+
+			UNION ALL
+            --
+            # admin 1 for countries that have no level 2 (768)
+            --
+            SELECT
+            lg2.grid_id, lg2.name, lg2.population, lg2.country_code, lg2.level
+            FROM location_grid lg2
+            WHERE lg2.level = 1
+			AND lg2.grid_id NOT IN ( SELECT lg22.admin1_grid_id FROM location_grid lg22 WHERE lg22.level = 2 AND lg22.admin1_grid_id = lg2.grid_id )
+             #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
+            AND lg2.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
+            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
+            AND lg2.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
+
+            UNION ALL
+			--
+            # admin 2 all countries (37100)
+            --
+			SELECT
+            lg3.grid_id, lg3.name, lg3.population,  lg3.country_code, lg3.level
+            FROM location_grid lg3
+            WHERE lg3.level = 2
+            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
+            AND lg3.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
+            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
+            AND lg3.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
+
+			UNION ALL
+            --
+            # admin 1 for little highly divided countries (352)
+            --
+            SELECT
+            lg4.grid_id, lg4.name, lg4.population, lg4.country_code, lg4.level
+            FROM location_grid lg4
+            WHERE lg4.level = 1
+            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
+            AND lg4.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
+            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
+            AND lg4.admin0_grid_id IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
+
+			UNION ALL
+
+ 			--
+            # admin 3 for big countries (6153)
+            --
+            SELECT
+            lg5.grid_id, lg5.name, lg5.population, lg5.country_code, lg5.level
+            FROM location_grid as lg5
+            WHERE
+            lg5.level = 3
+            #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
+            AND lg5.admin0_grid_id IN (100050711,100219347, 100089589,100074576,100259978,100018514)
+            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
+            AND lg5.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
+
+			# Total Records (44395)
+        ", ARRAY_A );
+
+        $data = [];
+        $highest_value = 1;
+        foreach ( $data_raw as $row ) {
+            $data[$row['grid_id']] = $row['population'];
+
+            if ( $highest_value < $row['population'] ){
+                $highest_value = $row['population'];
+            }
+        }
+
+        return [
+            'highest_value' => (int) $highest_value,
+            'data' => $data
+        ];
+    }
+
     public static function flat_grid_full() {
         global $wpdb;
         $data = $wpdb->get_results("
@@ -166,14 +254,14 @@ class Location_Grid_Queries {
 //            lg1.grid_id, lg1.name as full_name, FORMAT(lg1.population, 0) as formatted_population
 //            FROM location_grid lg1
 //            WHERE lg1.level = 0
-//			AND lg1.grid_id NOT IN ( SELECT lg11.admin0_grid_id FROM location_grid lg11 WHERE lg11.level = 1 AND lg11.admin0_grid_id = lg1.grid_id )
-// 			#'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
+//          AND lg1.grid_id NOT IN ( SELECT lg11.admin0_grid_id FROM location_grid lg11 WHERE lg11.level = 1 AND lg11.admin0_grid_id = lg1.grid_id )
+//          #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
 //            AND lg1.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
 //            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
 //            AND lg1.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
-//			# above admin 0 (22)
+//          # above admin 0 (22)
 //
-//			UNION ALL
+//          UNION ALL
 //            --
 //            # admin 1 for countries that have no level 2 (768)
 //            --
@@ -182,17 +270,17 @@ class Location_Grid_Queries {
 //            FROM location_grid lg2
 //            LEFT JOIN location_grid lg2a0 ON lg2.admin0_grid_id=lg2a0.grid_id
 //            WHERE lg2.level = 1
-//			AND lg2.grid_id NOT IN ( SELECT lg22.admin1_grid_id FROM location_grid lg22 WHERE lg22.level = 2 AND lg22.admin1_grid_id = lg2.grid_id )
+//          AND lg2.grid_id NOT IN ( SELECT lg22.admin1_grid_id FROM location_grid lg22 WHERE lg22.level = 2 AND lg22.admin1_grid_id = lg2.grid_id )
 //             #'China', 'India', 'France', 'Spain', 'Pakistan', 'Bangladesh'
 //            AND lg2.admin0_grid_id NOT IN (100050711,100219347, 100089589,100074576,100259978,100018514)
 //            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
 //            AND lg2.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
 //
 //            UNION ALL
-//			--
+//          --
 //            # admin 2 all countries (37100)
 //            --
-//			SELECT
+//          SELECT
 //            lg3.grid_id, CONCAT( lg3.name, ', ', lg3a1.name, ', ', lg3a0.name) as full_name, FORMAT(lg3.population, 0) as formatted_population
 //            FROM location_grid lg3
 //            LEFT JOIN location_grid lg3a0 ON lg3.admin0_grid_id=lg3a0.grid_id
@@ -203,7 +291,7 @@ class Location_Grid_Queries {
 //            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
 //            AND lg3.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
 //
-//			UNION ALL
+//          UNION ALL
 //            --
 //            # admin 1 for little highly divided countries (352)
 //            --
@@ -217,9 +305,9 @@ class Location_Grid_Queries {
 //            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
 //            AND lg4.admin0_grid_id IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
 //
-//			UNION ALL
+//          UNION ALL
 //
-// 			--
+//          --
 //            # admin 3 for big countries (6153)
 //            --
 //            SELECT
@@ -235,7 +323,7 @@ class Location_Grid_Queries {
 //            #'Romania', 'Estonia', 'Bhutan', 'Croatia', 'Solomon Islands', 'Guyana', 'Iceland', 'Vanuatu', 'Cape Verde', 'Samoa', 'Faroe Islands', 'Norway', 'Uruguay', 'Mongolia', 'United Arab Emirates', 'Slovenia', 'Bulgaria', 'Honduras', 'Columbia', 'Namibia', 'Switzerland', 'Western Sahara'
 //            AND lg5.admin0_grid_id NOT IN (100314737,100083318,100041128,100133112,100341242,100132648,100222839,100379914,100055707,100379993,100130389,100255271,100363975,100248845,100001527,100342458,100024289,100132795,100054605,100253456,100342975,100074571)
 //
-//			# Total Records (44395)
+//          # Total Records (44395)
 //        ", ARRAY_A );
 //
 //        return $data;
@@ -717,7 +805,7 @@ class Location_Grid_Queries {
 			LEFT JOIN wp_users u ON u.ID=gel.user_id
             ORDER BY gel.timestamp DESC
             LIMIT 2000 OFFSET %d;
-        ", $offset) , ARRAY_A );
+        ", $offset), ARRAY_A );
 
         return $data;
     }

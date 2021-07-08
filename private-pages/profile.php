@@ -12,8 +12,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     public $type = 'profile';
     public $post_type = 'contacts';
     private $meta_key = '';
-    public $allowed_scripts = [ 'datatables' ];
-    public $allowed_styles = [ 'datatables' ];
+    public $allowed_scripts = [ 'datatables', 'mapbox-gl' ];
+    public $allowed_styles = [ 'datatables', 'mapbox-gl-css' ];
 
     private static $_instance = null;
     public static function instance() {
@@ -24,8 +24,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     } // End instance()
 
     public function __construct() {
-
-
 
         $this->meta_key = $this->root . '_' . $this->type . '_magic_key';
         parent::__construct();
@@ -109,14 +107,20 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 width:100%;
                 height: 25px;
             }
+            .row-of-tiles {
+                border-bottom: 1px solid lightgrey;
+                padding-bottom:.5em;
+            }
         </style>
         <?php
     }
     public function header_javascript(){
+
         ?>
         <script>
             let jsObject = [<?php echo json_encode([
                 'map_key' => DT_Mapbox_API::get_key(),
+                'mirror_url' => 'https://storage.googleapis.com/location-grid-mirror-v2/',
                 'root' => esc_url_raw( rest_url() ),
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'parts' => $this->parts,
@@ -136,16 +140,18 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     }
 
     public function body(){
+        DT_Mapbox_API::geocoder_scripts();
         require_once( 'part-navigation.php' );
         $tiles = [
             'population_project' => [
                 'title' => 'Population Project',
-                'permissions' => ['manage_options'],
+                'permissions' => [ 'manage_options' ],
                 'tiles' => [
                     'population_difference' => [
                         'key' => 'population_difference',
                         'title' => 'Population Difference Project',
                         'description' => 'Shows the population difference from the country record to the flat grid calculation.',
+                        'auto_load' => 1,
                         'image' => '',
                         'class' => 'lightgreen',
                         'permissions' => []
@@ -154,6 +160,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'review_and_accept_population',
                         'title' => 'Review and Accept Population Changes',
                         'description' => 'Review and accept outstanding population changes',
+                        'auto_load' => 1,
                         'image' => '',
                         'class' => 'lightgreen',
                         'permissions' => [ 'manage_options' ]
@@ -162,12 +169,13 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             ],
             'name_project' => [
                 'title' => 'Name Project',
-                'permissions' => ['manage_options'],
+                'permissions' => [ 'manage_options' ],
                 'tiles' => [
                     'name_verification' => [
                         'key' => 'name_verification',
                         'title' => 'Name Verification',
                         'description' => 'Verifies or updates location name for the flat grid.',
+                        'auto_load' => 1,
                         'image' => '',
                         'class' => 'lightcoral',
                         'permissions' => [ 'manage_options' ]
@@ -182,6 +190,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'modification_activity',
                         'title' => 'Modification History',
                         'description' => 'History of changes to the database.',
+                        'auto_load' => 0,
                         'image' => '',
                         'class' => 'lightblue',
                         'permissions' => []
@@ -190,6 +199,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'summary',
                         'title' => 'Summary of Levels',
                         'description' => 'Summary of the location grid database by country and level.',
+                        'auto_load' => 1,
                         'image' => '',
                         'class' => 'lightblue',
                         'permissions' => []
@@ -198,6 +208,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'population_by_admin_layer',
                         'title' => 'Population by Layers',
                         'description' => 'Population by admin layers showing current total population calculated by the layer and then the difference.',
+                        'auto_load' => 1,
                         'image' => '',
                         'class' => 'lightblue',
                         'permissions' => []
@@ -206,6 +217,16 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'flat_grid',
                         'title' => 'Flat Grid',
                         'description' => 'Full list of the flat grid names and population.',
+                        'auto_load' => 1,
+                        'image' => '',
+                        'class' => 'lightblue',
+                        'permissions' => []
+                    ],
+                    'flat_grid_map' => [
+                        'key' => 'flat_grid_map',
+                        'title' => 'Flat Grid Map',
+                        'description' => 'Map of the flat grid with population values.',
+                        'auto_load' => 0,
                         'image' => '',
                         'class' => 'lightblue',
                         'permissions' => []
@@ -215,7 +236,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
         ]
         ?>
-        <div class="wrapper" style="max-width:1200px;margin: 0 auto;">
+        <style id="custom-style"></style>
+        <div class="wrapper">
             <div class="grid-x grid-padding-x">
                 <div class="cell">
                     <?php
@@ -228,7 +250,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         }
                         ?>
                         <h2 style="padding-top:1em;"><?php echo esc_html( $section['title'] ) ?></h2>
-                        <div class="grid-x grid-padding-x" style="border-bottom: 1px solid lightgrey;padding-bottom:.5em;" data-equalizer data-equalize-on="medium">
+                        <div class="grid-x grid-padding-x row-of-tiles" data-equalizer data-equalize-on="medium">
                         <?php
                         foreach ( $section['tiles'] as $key => $value ) {
                             if ( ! empty( $value['permissions'] ) ) {
@@ -238,7 +260,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 }
                             }
                             ?>
-                            <div class="cell medium-4 view-card" data-id="<?php echo esc_attr( $value['key'] ) ?>">
+                            <div class="cell medium-4 large-3 view-card"  data-id="<?php echo esc_attr( $value['key'] ) ?>" data-auto-load="<?php echo esc_attr( $value['auto_load'] ) ?>">
                                 <div class="card" data-equalizer-watch>
                                     <div class="card-divider">
                                         <strong><?php echo esc_html( $value['title'] ) ?></strong>
@@ -298,15 +320,21 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 $('.view-card').on('click', function(e){
                     // console.log(e)
                     let action = $(this).data('id')
+                    let auto = $(this).data('auto-load')
                     console.log(action)
 
                     $('#reveal-content').html(`<span class="loading-spinner active"></span>`)
                     $('#modal').foundation('open')
 
-                    window.get_page( action )
-                        .done(function( data ) {
-                            load_panel( action, data )
-                        })
+                    if ( auto ) {
+                        window.get_page( action )
+                            .done(function( data ) {
+                                load_panel( action, data )
+                            })
+                    } else {
+                        load_panel( action, 0 )
+                    }
+
                 })
             })
 
@@ -339,6 +367,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'name_verification_by_country':
                         load_name_verification_by_country(action, data, title)
                         break;
+                    case 'flat_grid_map':
+                        load_flat_grid_map()
+                        break;
                 }
             }
 
@@ -366,6 +397,267 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 jQuery('#summary-table').dataTable({
                     "paging": false
                 });
+            }
+
+            function load_flat_grid_map( action, data ) {
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <div id="initialize-screen">
+                        <div id="initialize-spinner-wrapper" class="center">
+                            <progress class="success initialize-progress" max="46" value="0"></progress><br>
+                            Loading the planet ...<br>
+                            <span id="initialize-people" style="display:none;">Locating world population...</span><br>
+                            <span id="initialize-activity" style="display:none;">Calculating movement activity...</span><br>
+                            <span id="initialize-coffee" style="display:none;">Shamelessly brewing coffee...</span><br>
+                            <span id="initialize-dothis" style="display:none;">Let's do this...</span><br>
+                        </div>
+                    </div>
+                    <div class="grid-x">
+                        <div class="cell medium-9" id="map-container">
+                            <div id="map-wrapper">
+                                <span class="loading-spinner active"></span>
+                                <div id='map'></div>
+                            </div>
+                        </div>
+                        <div class="cell medium-3" id="map-sidebar-wrapper">
+                            <div id="details-panel">
+                                <div class="grid-x grid-padding-x" >
+                                    <div class="cell">
+                                        <br><br>
+                                        <h1 id="title"></h1><br>
+                                        <h3>Population: <span id="population">0</span></h3><br>
+                                        <hr>
+                                        <span style="color:lightgrey;" id="grid_id">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `)
+
+                $('#custom-style').empty().append(`
+                    #wrapper {
+                        height: ${window.innerHeight}px !important;
+                    }
+                    #map-wrapper {
+                        height: ${window.innerHeight}px !important;
+                    }
+                    #map {
+                        height: ${window.innerHeight}px !important;
+                    }
+                    #initialize-screen {
+                        height: ${window.innerHeight}px !important;
+                    }
+                    #welcome-modal {
+                        height: ${window.innerHeight - 30}px !important;
+                    }
+                    #map-sidebar-wrapper {
+                        height: ${window.innerHeight}px !important;
+                    }
+                `)
+
+                let initialize_screen = jQuery('.initialize-progress')
+
+                // preload all geojson
+                let asset_list = []
+                var i = 1;
+                while( i <= 45 ){
+                    asset_list.push(i+'.geojson')
+                    i++
+                }
+
+                let loop = 0
+                let list = 0
+                window.load_map_triggered = 0
+                window.get_page( 'flat_grid_populations')
+                    .done(function(x){
+                        list = 1
+                        jsObject.grid_data = x
+                        if ( loop > 44 && list > 0 && window.load_map_triggered !== 1 ){
+                            window.load_map_triggered = 1
+                            load_map()
+                        }
+                    })
+                    .fail(function(){
+                        console.log('Error getting grid data')
+                        jsObject.grid_data = {'data': {}, 'highest_value': 1 }
+                    })
+                jQuery.each(asset_list, function(i,v) {
+                    jQuery.ajax({
+                        url: jsObject.mirror_url + 'tiles/world/saturation/' + v,
+                        dataType: 'json',
+                        data: null,
+                        cache: true,
+                        beforeSend: function (xhr) {
+                            if (xhr.overrideMimeType) {
+                                xhr.overrideMimeType("application/json");
+                            }
+                        }
+                    })
+                        .done(function(x){
+                            loop++
+                            initialize_screen.val(loop)
+
+                            if ( 5 === loop ) {
+                                jQuery('#initialize-people').show()
+                            }
+
+                            if ( 15 === loop ) {
+                                jQuery('#initialize-activity').show()
+                            }
+
+                            if ( 22 === loop ) {
+                                jQuery('#initialize-coffee').show()
+                            }
+
+                            if ( 40 === loop ) {
+                                jQuery('#initialize-dothis').show()
+                            }
+
+                            if ( loop > 44 && list > 0 && window.load_map_triggered !== 1 ){
+                                window.load_map_triggered = 1
+                                load_map()
+                            }
+                        })
+                        .fail(function(){
+                            loop++
+                        })
+                })
+
+                function load_map() {
+                    jQuery('#initialize-screen').hide()
+
+                    // set title
+                    let ptt = 'Population'
+                    $('#panel-type-title').html(ptt)
+
+                    $('.loading-spinner').removeClass('active')
+
+                    let center = [-98, 38.88]
+                    mapboxgl.accessToken = jsObject.map_key;
+                    let map = new mapboxgl.Map({
+                        container: 'map',
+                        style: 'mapbox://styles/mapbox/light-v10',
+                        center: center,
+                        minZoom: 2,
+                        maxZoom: 8,
+                        zoom: 3
+                    });
+                    map.dragRotate.disable();
+                    map.touchZoomRotate.disableRotation();
+
+                    window.previous_hover = false
+
+                    let asset_list = []
+                    var i = 1;
+                    while( i <= 45 ){
+                        asset_list.push(i+'.geojson')
+                        i++
+                    }
+
+                    jQuery.each(asset_list, function(i,v){
+
+                        jQuery.ajax({
+                            url: jsObject.mirror_url + 'tiles/world/saturation/' + v,
+                            dataType: 'json',
+                            data: null,
+                            cache: true,
+                            beforeSend: function (xhr) {
+                                if (xhr.overrideMimeType) {
+                                    xhr.overrideMimeType("application/json");
+                                }
+                            }
+                        })
+                            .done(function (geojson) {
+
+                                map.on('load', function() {
+
+                                    jQuery.each(geojson.features, function (i, v) {
+                                        if (typeof jsObject.grid_data.data[v.id] !== 'undefined' ) {
+                                            geojson.features[i].properties.value = parseInt(jsObject.grid_data.data[v.id])
+                                        } else {
+                                            geojson.features[i].properties.value = 0
+                                        }
+                                    })
+
+                                    map.addSource(i.toString(), {
+                                        'type': 'geojson',
+                                        'data': geojson
+                                    });
+                                    map.addLayer({
+                                        'id': i.toString()+'line',
+                                        'type': 'line',
+                                        'source': i.toString(),
+                                        'paint': {
+                                            'line-color': 'grey',
+                                            'line-width': .5
+                                        }
+                                    });
+
+                                    /**************/
+                                    /* hover map*/
+                                    /**************/
+                                    map.addLayer({
+                                        'id': i.toString() + 'fills',
+                                        'type': 'fill',
+                                        'source': i.toString(),
+                                        'paint': {
+                                            'fill-color': 'black',
+                                            'fill-opacity': [
+                                                'case',
+                                                ['boolean', ['feature-state', 'hover'], false],
+                                                .8,
+                                                0
+                                            ]
+                                        }
+                                    })
+                                    /* end hover map*/
+
+                                    /**********/
+                                    /* heat map brown */
+                                    /**********/
+                                    map.addLayer({
+                                        'id': i.toString() + 'fills_heat',
+                                        'type': 'fill',
+                                        'source': i.toString(),
+                                        'paint': {
+                                            'fill-color': {
+                                                property: 'value',
+                                                stops: [[0, 'rgba(0, 0, 0, 0)'], [1, 'rgb(155, 200, 254)'], [jsObject.grid_data.highest_value, 'rgb(37, 82, 154)']]
+                                            },
+                                            'fill-opacity': 0.75,
+                                            'fill-outline-color': '#707070'
+                                        }
+                                    })
+                                    /**********/
+                                    /* end fill map */
+                                    /**********/
+
+                                    map.on('mousemove', i.toString()+'fills', function (e) {
+                                        if ( window.previous_hover ) {
+                                            map.setFeatureState(
+                                                window.previous_hover,
+                                                { hover: false }
+                                            )
+                                        }
+                                        window.previous_hover = { source: i.toString(), id: e.features[0].id }
+                                        if (e.features.length > 0) {
+                                            map.setFeatureState(
+                                                window.previous_hover,
+                                                {hover: true}
+                                            );
+                                            $('#title').html(e.features[0].properties.full_name)
+                                            $('#population').html(numberWithCommas(jsObject.grid_data.data[e.features[0].properties.grid_id]))
+                                            $('#grid_id').html(e.features[0].properties.grid_id)
+                                        }
+                                    });
+                                })
+
+                            }) /* ajax call */
+                    }) /* for each loop */
+
+                } /* .preCache */
+
             }
 
             function load_population_by_admin_layer( action, data ) {
@@ -929,6 +1221,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::summary();
             case 'flat_grid':
                 return Location_Grid_Queries::flat_grid_full();
+            case 'flat_grid_populations':
+                return Location_Grid_Queries::flat_grid_populations();
             case 'flat_grid_by_country':
                 return Location_Grid_Queries::flat_grid_by_country( $params['data'] );
             case 'population_difference':
