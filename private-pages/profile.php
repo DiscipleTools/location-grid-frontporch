@@ -182,8 +182,23 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     ],
                 ],
             ],
+            'maps' => [
+                'title' => 'Maps',
+                'permissions' => [],
+                'tiles' => [
+                    'flat_grid_map' => [
+                        'key' => 'flat_grid_map',
+                        'title' => 'Flat Grid Map',
+                        'description' => 'Map of the flat grid with population values.',
+                        'auto_load' => 0,
+                        'image' => '',
+                        'class' => 'lightblue',
+                        'permissions' => []
+                    ],
+                ],
+            ],
             'explore' => [
-                'title' => 'Explore',
+                'title' => 'Database',
                 'permissions' => [],
                 'tiles' => [
                     'modification_activity' => [
@@ -218,15 +233,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'title' => 'Flat Grid',
                         'description' => 'Full list of the flat grid names and population.',
                         'auto_load' => 1,
-                        'image' => '',
-                        'class' => 'lightblue',
-                        'permissions' => []
-                    ],
-                    'flat_grid_map' => [
-                        'key' => 'flat_grid_map',
-                        'title' => 'Flat Grid Map',
-                        'description' => 'Map of the flat grid with population values.',
-                        'auto_load' => 0,
                         'image' => '',
                         'class' => 'lightblue',
                         'permissions' => []
