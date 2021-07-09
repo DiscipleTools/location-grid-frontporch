@@ -111,6 +111,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 border-bottom: 1px solid lightgrey;
                 padding-bottom:.5em;
             }
+            #summary-table tr {
+                cursor: pointer;
+            }
         </style>
         <?php
     }
@@ -140,6 +143,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     }
 
     public function body(){
+        global $wpdb;
         DT_Mapbox_API::geocoder_scripts();
         require_once( 'part-navigation.php' );
         $tiles = [
@@ -190,6 +194,15 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'key' => 'flat_grid_map',
                         'title' => 'Flat Grid Map',
                         'description' => 'Map of the flat grid with population values.',
+                        'auto_load' => 0,
+                        'image' => '',
+                        'class' => 'lightblue',
+                        'permissions' => []
+                    ],
+                    'search_map' => [
+                        'key' => 'search_map',
+                        'title' => 'Search Map',
+                        'description' => 'Search Map for a specific location',
                         'auto_load' => 0,
                         'image' => '',
                         'class' => 'lightblue',
@@ -376,6 +389,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'flat_grid_map':
                         load_flat_grid_map()
                         break;
+                    case 'search_map':
+                        load_search_map()
+                        break;
                 }
             }
 
@@ -403,6 +419,283 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 jQuery('#summary-table').dataTable({
                     "paging": false
                 });
+            }
+
+            function load_search_map() {
+                let countries = [<?php
+                    $countries = $wpdb->get_results("SELECT name, country_code FROM location_grid WHERE level = 0 ORDER BY name;", ARRAY_A);
+                    echo json_encode($countries) ?>][0]
+
+                let option_list = ''
+                option_list += '<option value=""></option>'
+                jQuery.each(countries, function(i,v){
+                    option_list += '<option value="'+v.country_code+'">'+v.name+'</option>'
+                })
+
+                let content = jQuery('#reveal-content')
+                content.empty().html(`
+                    <h1>Search Map</h1>
+                    <div class="grid-x grid-padding-x">
+                        <div class="cell medium-3">
+                            <div class="grid-x grid-padding-x">
+                                <div class="cell">
+                                     <div class="input-group">
+                                          <input class="input-group-field" id="search-name-value" type="text" placeholder="Name">
+                                          <div class="input-group-button">
+                                            <input type="submit" class="button search-button" data-type="name" id="search-name-button" value="Search">
+                                          </div>
+                                     </div>
+                                </div>
+                                <div class="cell">
+                                     <div class="input-group">
+                                          <input class="input-group-field" id="search-grid_id-value" type="text" placeholder="Grid ID">
+                                          <div class="input-group-button">
+                                            <input type="submit" class="button search-button" id="search-grid_id-button" data-type="grid_id" value="Search">
+                                          </div>
+                                     </div>
+                                </div>
+                                <div class="cell">
+                                     <div class="input-group">
+                                            <select class="input" id="search-country_code-value">
+                                                ${option_list}
+                                            </select>
+                                            <select class="input" id="search-country_code-admin">
+                                                <option value="admin0">Admin0</option>
+                                                <option value="admin1">Admin1</option>
+                                                <option value="admin2">Admin2</option>
+                                                <option value="admin3">Admin3</option>
+                                                <option value="admin4">Admin4</option>
+                                                <option value="admin5">Admin5</option>
+                                            </select>
+                                          <div class="input-group-button">
+                                            <input type="submit" style="height:38px;" class="button search-button" id="search-country_code-button" data-type="country_code" value="Search">
+                                          </div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cell medium-9">
+                            <div class="table-scroll">
+                                <table class="hover" id="summary-table">
+                                    <tbody id="table-list"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `)
+
+                let list = jQuery('#table-list')
+                let input_name = jQuery('#search-name-value')
+                let input_name_button = jQuery('#search-name-button')
+                let input_grid_id = jQuery('#search-grid_id-value')
+                let input_grid_id_button = jQuery('#search-grid_id-button')
+                let input_country_code = jQuery('#search-country_code-value')
+                let input_country_code_admin = jQuery('#search-country_code-admin')
+                let input_country_code_button = jQuery('#search-country_code-button')
+
+                jQuery('.input-group-field').on('focus', function(){
+                    if ( input_name.attr('id') !== jQuery(this).attr('id') ) {
+                        input_name.val('')
+                    }
+                    if ( input_grid_id.attr('id') !== jQuery(this).attr('id') ) {
+                        input_grid_id.val('')
+                    }
+                    if ( input_country_code.attr('id') !== jQuery(this).attr('id') ) {
+                        input_country_code.val('')
+                    }
+                })
+
+                input_name_button.on('click', function(){
+                    jQuery('.search-button').prop('disabled', true)
+                    let term = input_name.val()
+                    let type = input_name_button.data('type')
+                    search( type, term )
+                })
+                input_grid_id_button.on('click', function(){
+                    jQuery('.search-button').prop('disabled', true)
+                    let term = input_grid_id.val()
+                    let type = input_grid_id_button.data('type')
+                    search( type, term )
+                })
+                input_country_code_button.on('click', function(){
+                    jQuery('.search-button').prop('disabled', true)
+                    let term = input_country_code.val()
+                    let term2 = input_country_code_admin.val()
+                    let type = input_country_code_button.data('type')
+                    search( type, term, term2 )
+                })
+                $('.input-group-field').keypress(function (e) {
+                    var key = e.which;
+                    if( key === 13 )  // the enter key code
+                    {
+                        if( input_name.val() )  // the enter key code
+                        {
+                            jQuery('.search-button').prop('disable', true)
+                            let term = input_name.val()
+                            let type = input_name_button.data('type')
+                            search( type, term )
+                            return false;
+                        }
+                        else if( input_grid_id.val() )  // the enter key code
+                        {
+                            jQuery('.search-button').prop('disable', true)
+                            let term = input_grid_id.val()
+                            let type = input_grid_id_button.data('type')
+                            search( type, term )
+                            return false;
+                        }
+                        else if( input_country_code.val() )  // the enter key code
+                        {
+                            jQuery('.search-button').prop('disabled', true)
+                            let term = input_country_code.val()
+                            let term2 = input_country_code_admin.val()
+                            let type = input_country_code_button.data('type')
+                            search( type, term, term2 )
+                            return false;
+                        }
+                    }
+                });
+
+                function search( type, term, term2 = null ) {
+
+                    list.empty().html(`<span class="loading-spinner active"></span>`)
+
+                    window.get_data_page( 'search_map_query', { type: type, term: term, term2: term2 } )
+                        .done(function(data){
+                            console.log(data)
+
+                            if ( data ) {
+                                let row = ''
+                                list.empty()
+                                jQuery.each(data, function(i,v){
+                                    row = '<tr data-id="'+v.grid_id+'">'
+                                    jQuery.each(v, function(ii,vv){
+                                        row += '<td>'+vv+'</td>'
+                                    })
+                                    row += '</tr>'
+                                    list.append(row)
+                                })
+                            }
+                            else {
+                                list.empty().append(`<tr><td>No matches found.</td></tr>`)
+                            }
+
+                            jQuery('.search-button').prop('disabled', false)
+
+                            jQuery('#table-list tr').on('click', function(){
+                                let grid_id = jQuery(this).data('id')
+                                load_single_map( grid_id )
+                            })
+                        })
+                }
+
+            }
+
+            function load_single_map( grid_id ) {
+                let content = jQuery('#reveal-content-map')
+                content.html(`<span class="loading-spinner active"></span>`)
+                jQuery('#modal-map').foundation('open')
+
+                content.empty().html(`
+                    <style id="map-style"></style>
+                    <h1 id="map-title"><span class="loading-spinner active"></span></h1>
+                    <div class="grid-x grid-padding-x">
+                        <div class="cell" id="map-container">
+                           <div id="map-wrapper" >
+                                <div id='single-map'></div>
+                            </div>
+                        </div>
+                    </div>
+                `)
+
+                jQuery('#map-style').empty().append(`
+                        #wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #map-wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #single-map {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                    `)
+
+                let center = [-98, 38.88]
+                mapboxgl.accessToken = jsObject.map_key;
+                let map = new mapboxgl.Map({
+                    container: 'single-map',
+                    style: 'mapbox://styles/mapbox/light-v10',
+                    center: center,
+                    minZoom: 2,
+                    maxZoom: 8,
+                    zoom: 3
+                });
+                map.dragRotate.disable();
+                // disable drag
+                // disable zoom higher than parent
+                // disable zoom closer than selected
+                map.touchZoomRotate.disableRotation();
+
+                map.on('load', function() {
+                    jQuery.ajax({
+                        url: jsObject.mirror_url + 'low/'+grid_id+'.geojson',
+                        dataType: 'json',
+                        data: null,
+                        cache: true,
+                        beforeSend: function (xhr) {
+                            if (xhr.overrideMimeType) {
+                                xhr.overrideMimeType("application/json");
+                            }
+                        }
+                    })
+                        .done(function (geojson) {
+                            map.addSource('selected', {
+                                'type': 'geojson',
+                                'data': geojson
+                            });
+                            map.addLayer({
+                                'id': 'selected_fill',
+                                'type': 'fill',
+                                'source': 'selected',
+                                'paint': {
+                                    'fill-color': '#0080ff',
+                                    'fill-opacity': 0.75
+                                }
+                            });
+                            map.addLayer({
+                                'id': 'selected_line',
+                                'type': 'line',
+                                'source': 'selected',
+                                'paint': {
+                                    'line-color': 'black',
+                                    'line-width': 1
+                                }
+                            });
+                        })
+                    window.get_data_page( 'grid_row', grid_id )
+                        .done(function(grid_row) {
+                            if ( grid_row ) {
+
+                                jQuery('#map-title').html(grid_row.full_name)
+
+                                map.fitBounds([
+                                    [parseFloat( grid_row.west_longitude), parseFloat(grid_row.south_latitude)], // southwestern corner of the bounds
+                                    [parseFloat(grid_row.east_longitude), parseFloat(grid_row.north_latitude)] // northeastern corner of the bounds
+                                ]);
+
+                                // zoom to parent bbox
+
+                                // highlight selected polygon
+
+                                // fly zoom to selected polygon
+
+                                // load all children into parent
+
+
+                                jQuery('.loading-spinner').removeClass('active')
+                            }
+                        })
+                })
             }
 
             function load_flat_grid_map( action, data ) {
@@ -772,8 +1065,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 jQuery('.country_selection').on('click', function(e){
 
-                    $('#reveal-content').html(`<span class="loading-spinner active"></span>`)
-                    $('#modal').foundation('open')
+                    $('#reveal-content-2').html(`<span class="loading-spinner active"></span>`)
+                    $('#modal-2').foundation('open')
                     let cc = jQuery(this).data('id')
                     let name = jQuery(this).data('name')
                     window.get_data_page( 'flat_grid_by_country', cc )
@@ -784,12 +1077,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             }
 
             function load_flat_grid_by_country(action, data, title) {
-                let content = jQuery('#reveal-content')
+                let content = jQuery('#reveal-content-2')
                 content.empty().html(`
                     <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
-                    <style id="local-style">.verified {display:none;}</style>
-                    <h1>Flat Grid - <span id="country_code">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified">show verified</button></h1>
-                    <table class="hover display" id="summary-table">
+                    <style id="local-style-2">.verified {display:none;}</style>
+                    <h1>Flat Grid - <span id="country_code-2">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified-2">show verified</button></h1>
+                    <table class="hover display" id="summary-table-2">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -800,9 +1093,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 <th>Level</th>
                             </tr>
                         </thead>
-                        <tbody id="table-list"></tbody>
+                        <tbody id="table-list-2"></tbody>
                     </table>`)
-                let table_list = jQuery('#table-list')
+                let table_list = jQuery('#table-list-2')
                 jQuery.each( data, function(i,v){
                     let check = ''
                     if ( v.verified !== '' ){
@@ -811,9 +1104,9 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     table_list.append(
                         `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}">
                             <td>${v.full_name}</td>
-                            <td id="population_${v.grid_id}">${v.formatted_population}</td>
+                            <td id="population_${v.grid_id}-2">${v.formatted_population}</td>
                             <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
-                            <td id="verified_${v.grid_id}">${check}</td>
+                            <td id="verified_${v.grid_id}-2">${check}</td>
                             <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
                                 <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
                             <td>${v.level}</td>
@@ -821,7 +1114,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     )
                 })
 
-                jQuery('#summary-table').dataTable({
+                jQuery('#summary-table-2').dataTable({
                     "paging": false
                 });
 
@@ -840,27 +1133,27 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     }
 
 
-                    jQuery('#verified_'+id).html('saving...')
+                    jQuery('#verified_'+id+'-2').html('saving...')
 
                     let data = {'grid_id': id, 'old_value': old, 'new_value': value }
                     window.get_data_page('update_population', data )
                         .done(function(result) {
                             if ( result.status === 'OK' ){
-                                jQuery('#'+id).addClass('verified')
-                                jQuery('#verified_'+id).html('&#9989;')
-                                jQuery('#population_'+id).html(value)
+                                jQuery('#'+id+'-2').addClass('verified')
+                                jQuery('#verified_'+id+'-2').html('&#9989;')
+                                jQuery('#population_'+id+'-2').html(value)
                             }
                             console.log(result)
                         })
                 })
 
-                jQuery('#show_verified').on('click', function(){
+                jQuery('#show_verified-2').on('click', function(){
                     if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
                         window.show_verified = true
-                        jQuery('#local-style').html(`.verified {display:none;}`)
+                        jQuery('#local-style-2').html(`.verified {display:none;}`)
                     } else {
                         window.show_verified = false
-                        jQuery('#local-style').html(` `)
+                        jQuery('#local-style-2').html(` `)
                     }
                 })
             }
@@ -891,8 +1184,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 jQuery('.country_selection').on('click', function(e){
 
-                    $('#reveal-content').html(`<span class="loading-spinner active"></span>`)
-                    $('#modal').foundation('open')
+                    $('#reveal-content-2').html(`<span class="loading-spinner active"></span>`)
+                    $('#modal-2').foundation('open')
                     let cc = jQuery(this).data('id')
                     let name = jQuery(this).data('name')
                     window.get_data_page( 'name_verification_by_country', cc )
@@ -903,12 +1196,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             }
 
             function load_name_verification_by_country(action, data, title) {
-                let content = jQuery('#reveal-content')
+                let content = jQuery('#reveal-content-2')
                 content.empty().html(`
                     <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
-                    <style id="custom-style">.verified {display:none;}</style>
-                    <h1>Flat Grid - <span id="country_code">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified">show verified</button></h1>
-                    <table class="hover display" id="summary-table">
+                    <style id="local-style">.verified {display:none;}</style>
+                    <h1>Flat Grid - <span id="country_code-2">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified-2">show verified</button></h1>
+                    <table class="hover display" id="summary-table-2">
                         <thead>
                             <tr>
                                 <th>Full Name</th>
@@ -919,28 +1212,30 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 <th>Links</th>
                             </tr>
                         </thead>
-                        <tbody id="table-list"></tbody>
+                        <tbody id="table-list-2"></tbody>
                     </table>`)
-                let table_list = jQuery('#table-list')
+                let table_list = jQuery('#table-list-2')
                 jQuery.each( data, function(i,v){
                     let check = ''
                     if ( v.verified !== '' ){
                         check = '&#9989;'
                     }
                     table_list.append(
-                        `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}">
+                        `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}-2">
                             <td>${v.full_name}</td>
-                            <td id="name_${v.grid_id}">${v.name}</td>
+                            <td id="name_${v.grid_id}-2">${v.name}</td>
                             <td><input type="text" class="input" data-id="${v.grid_id}" data-old="${v.name}" /></td>
+                            <td id="verified_${v.grid_id}-2">${check}</td>
                             <td>${v.level}</td>
-                            <td id="verified_${v.grid_id}">${check}</td>
-                            <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
-                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
+                            <td>
+                                <img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
+                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/>
+                            </td>
                         </tr>`
                     )
                 })
 
-                jQuery('#summary-table').dataTable({
+                jQuery('#summary-table-2').dataTable({
                     "paging": false
                 });
 
@@ -958,15 +1253,15 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         return
                     }
 
-                    jQuery('#verified_'+id).html('saving...')
+                    jQuery('#verified_'+id+'-2').html('saving...')
 
                     let data = {'grid_id': id, 'old_value': old, 'new_value': value }
                     window.get_data_page('update_name', data )
                         .done(function(result) {
                             if ( result.status === 'OK' ){
-                                jQuery('#'+id).addClass('verified')
-                                jQuery('#verified_'+id).html('&#9989;')
-                                jQuery('#name_'+id).html(value)
+                                jQuery('#'+id+'-2').addClass('verified')
+                                jQuery('#verified_'+id+'-2').html('&#9989;')
+                                jQuery('#name_'+id+'-2').html(value)
                             }
                             console.log(result)
                         })
@@ -975,10 +1270,10 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 jQuery('#show_verified').on('click', function(){
                     if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
                         window.show_verified = true
-                        jQuery('#custom-style').html(`.verified {display:none;}`)
+                        jQuery('#local-style').html(`.verified {display:none;}`)
                     } else {
                         window.show_verified = false
-                        jQuery('#custom-style').html(` `)
+                        jQuery('#local-style').html(` `)
                     }
                 })
             }
@@ -1171,8 +1466,20 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             }
 
         </script>
-        <div class="reveal full" id="modal" data-v-offset="0" data-reveal>
+        <div class="reveal full" id="modal" data-v-offset="0" data-multiple-opened="true" data-reveal>
             <div id="reveal-content"></div>
+            <button class="close-button" data-close aria-label="Close modal" type="button">
+                <span aria-hidden="true">Close &times;</span>
+            </button>
+        </div>
+        <div class="reveal full" id="modal-2" data-v-offset="0" data-multiple-opened="true" data-reveal>
+            <div id="reveal-content-2"></div>
+            <button class="close-button" data-close aria-label="Close modal" type="button">
+                <span aria-hidden="true">Close &times;</span>
+            </button>
+        </div>
+        <div class="reveal full" id="modal-map" data-v-offset="0" data-multiple-opened="true" data-reveal>
+            <div id="reveal-content-map"></div>
             <button class="close-button" data-close aria-label="Close modal" type="button">
                 <span aria-hidden="true">Close &times;</span>
             </button>
@@ -1251,6 +1558,10 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return $this->commit_populations_to_master( $params['data'] );
             case 'reject_population':
                 return $this->reject_population( $params['data'] );
+            case 'search_map_query':
+                return Location_Grid_Queries::search_map_query( $params['data'] );
+            case 'grid_row':
+                return Location_Grid_Queries::grid_row( $params['data'] );
 
             default:
                 return new WP_Error( __METHOD__, "Missing valid action", [ 'status' => 400 ] );
