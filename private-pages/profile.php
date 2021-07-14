@@ -149,7 +149,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         $tiles = [
             'population_project' => [
                 'title' => 'Population Project',
-                'permissions' => [ 'manage_options' ],
+                'permissions' => [],
                 'tiles' => [
                     'population_difference' => [
                         'key' => 'population_difference',
