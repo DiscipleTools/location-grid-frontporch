@@ -261,8 +261,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 <div class="cell">
                     <?php
                     foreach ( $tiles as $section ) {
-                        if ( ! empty( $value['permissions'] ) ) {
-                            $has_permissions = $this->_has_permissions( $value['permissions'] );
+                        if ( ! empty( $section['permissions'] ) ) {
+                            $has_permissions = $this->_has_permissions( $section['permissions'] );
                             if ( ! $has_permissions ) {
                                 continue;
                             }
