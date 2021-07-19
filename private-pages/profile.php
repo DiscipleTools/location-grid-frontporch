@@ -12,8 +12,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     public $type = 'profile';
     public $post_type = 'contacts';
     private $meta_key = '';
-    public $allowed_scripts = [ 'datatables', 'mapbox-gl' ];
-    public $allowed_styles = [ 'datatables', 'mapbox-gl-css' ];
+    public $allowed_scripts = [ 'datatables', 'mapbox-gl', 'lodash', 'lodash-core', 'site-js', 'shared-functions' ];
+    public $allowed_styles = [ 'datatables', 'mapbox-gl-css', 'site-css', 'foundation-css' ];
 
     private static $_instance = null;
     public static function instance() {
