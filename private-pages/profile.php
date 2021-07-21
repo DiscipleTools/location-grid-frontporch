@@ -1080,7 +1080,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 let content = jQuery('#reveal-content-2')
                 content.empty().html(`
                     <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
-                    <style id="local-style-2">.verified {display:none;}</style>
+                    <style class="local-style-2">.verified-2 {display:none;}</style>
                     <h1>Flat Grid - <span id="country_code-2">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified-2">show verified</button></h1>
                     <table class="hover display" id="summary-table-2">
                         <thead>
@@ -1102,7 +1102,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         check = '&#9989;'
                     }
                     table_list.append(
-                        `<tr class="${v.grid_id} ${v.verified}" id="${v.grid_id}">
+                        `<tr class="${v.grid_id} ${v.verified}-2" id="${v.grid_id}">
                             <td>${v.full_name}</td>
                             <td id="population_${v.grid_id}-2">${v.formatted_population}</td>
                             <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
@@ -1139,7 +1139,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     window.get_data_page('update_population', data )
                         .done(function(result) {
                             if ( result.status === 'OK' ){
-                                jQuery('#'+id+'-2').addClass('verified')
+                                jQuery('#'+id).addClass('verified-2')
                                 jQuery('#verified_'+id+'-2').html('&#9989;')
                                 jQuery('#population_'+id+'-2').html(value)
                             }
@@ -1149,11 +1149,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 jQuery('#show_verified-2').on('click', function(){
                     if ( typeof window.show_verified === 'undefined' || window.show_verified === false ) {
+                        console.log('here')
                         window.show_verified = true
-                        jQuery('#local-style-2').html(`.verified {display:none;}`)
+                        jQuery('.local-style-2').html(`.verified-2 {display:none;}`)
                     } else {
                         window.show_verified = false
-                        jQuery('#local-style-2').html(` `)
+                        jQuery('.local-style-2').html(` `)
                     }
                 })
             }
