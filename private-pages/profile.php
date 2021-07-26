@@ -5,15 +5,10 @@ LG_Public_Porch_Profile::instance();
 
 class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
-    public $magic = false;
-    public $parts = false;
     public $page_title = 'Profile';
     public $root = "grid_app";
     public $type = 'profile';
     public $post_type = 'contacts';
-    private $meta_key = '';
-    public $allowed_scripts = [ 'datatables', 'mapbox-gl', 'lodash', 'lodash-core', 'site-js', 'shared-functions' ];
-    public $allowed_styles = [ 'datatables', 'mapbox-gl-css', 'site-css', 'foundation-css' ];
 
     private static $_instance = null;
     public static function instance() {
@@ -24,8 +19,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
     } // End instance()
 
     public function __construct() {
-
-        $this->meta_key = $this->root . '_' . $this->type . '_magic_key';
         parent::__construct();
 
         /**
@@ -60,21 +53,24 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         }
 
         // load if valid url
-        add_action( 'dt_blank_head', [ $this, '_header' ] );
-        add_action( 'dt_blank_footer', [ $this, '_footer' ] );
         add_action( 'dt_blank_body', [ $this, 'body' ] ); // body for no post key
 
         add_action( 'wp_enqueue_scripts', [ $this, 'scripts' ], 99 );
+        add_filter( 'dt_magic_url_base_allowed_css', [ $this, 'dt_magic_url_base_allowed_css' ], 10, 1 );
+        add_filter( 'dt_magic_url_base_allowed_js', [ $this, 'dt_magic_url_base_allowed_js' ], 10, 1 );
 
     }
 
-    public function _header(){
-        wp_head();
-        $this->header_style();
-        $this->header_javascript();
+    public function dt_magic_url_base_allowed_js( $allowed_js ) {
+        $allowed_js[] = 'datatables';
+        $allowed_js[] = 'mapbox-gl';
+        return $allowed_js;
     }
-    public function _footer(){
-        wp_footer();
+
+    public function dt_magic_url_base_allowed_css( $allowed_css ) {
+        $allowed_css[] = 'datatables';
+        $allowed_css[] = 'mapbox-gl-css';
+        return $allowed_css;
     }
 
     public function scripts() {
@@ -114,11 +110,12 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
             #summary-table tr {
                 cursor: pointer;
             }
+            .social-icon { height: 20px; padding: 2px; cursor:pointer;}
+            .map-icon { height: 20px; padding: 2px; cursor:pointer;}
         </style>
         <?php
     }
     public function header_javascript(){
-
         ?>
         <script>
             let jsObject = [<?php echo json_encode([
@@ -127,6 +124,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 'root' => esc_url_raw( rest_url() ),
                 'nonce' => wp_create_nonce( 'wp_rest' ),
                 'parts' => $this->parts,
+                'map_marker' => plugin_dir_url( __FILE__ ) . 'marker.png',
                 'google_logo' => plugin_dir_url( __FILE__ ) . 'google.png',
                 'wikipedia_logo' => plugin_dir_url( __FILE__ ) .'wikipedia.png',
                 'translations' => [
@@ -168,7 +166,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'image' => '',
                         'class' => 'lightgreen',
                         'permissions' => [ 'manage_options' ]
-                    ],
+                    ]
                 ],
             ],
             'name_project' => [
@@ -392,7 +390,14 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'search_map':
                         load_search_map()
                         break;
+                    case 'test_map':
+                        load_single_map( 100364508 )
+                        break;
                 }
+            }
+
+            function show_map( grid_id ) {
+                load_single_map( grid_id )
             }
 
             function load_summary( action, data ) {
@@ -598,12 +603,27 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 content.empty().html(`
                     <style id="map-style"></style>
-                    <h1 id="map-title"><span class="loading-spinner active"></span></h1>
-                    <div class="grid-x grid-padding-x">
+                    <h1 ><span id="map-title"><span class="loading-spinner active"></span></span> <button class="button small" id="uplevel">Up Level</button></h1>
+                    <div class="grid-x grid-padding-x" style="margin-bottom:1em;">
                         <div class="cell" id="map-container">
                            <div id="map-wrapper" >
                                 <div id='single-map'></div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="grid-x grid-padding-x" id="data-section">
+                        <div class="cell medium-4">
+                             <h2>Self</h2>
+                            <span class="loading-spinner active"></span>
+                            <table><tbody id="self_column"></tbody></table>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                            <h2>Peers</h2>
+                            <div id="peers_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                             <h2>Children</h2>
+                            <div id="children_column"><span class="loading-spinner active"></span></div>
                         </div>
                     </div>
                 `)
@@ -618,84 +638,134 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         #single-map {
                             height: ${window.innerHeight / 2}px !important;
                         }
+                        #data-section span {
+                            color: blue;
+                            cursor: pointer;
+                        }
                     `)
 
-                let center = [-98, 38.88]
-                mapboxgl.accessToken = jsObject.map_key;
-                let map = new mapboxgl.Map({
-                    container: 'single-map',
-                    style: 'mapbox://styles/mapbox/light-v10',
-                    center: center,
-                    minZoom: 2,
-                    maxZoom: 8,
-                    zoom: 3
-                });
-                map.dragRotate.disable();
-                // disable drag
-                // disable zoom higher than parent
-                // disable zoom closer than selected
-                map.touchZoomRotate.disableRotation();
+                window.get_data_page( 'grid_row', grid_id )
+                    .done(function(grid_row) {
+                        console.log( grid_row )
+                        if ( grid_row ) {
+                            jQuery('#uplevel').on('click', function(){
+                                load_single_map( grid_row.parent_id )
+                            })
 
-                map.on('load', function() {
-                    jQuery.ajax({
-                        url: jsObject.mirror_url + 'low/'+grid_id+'.geojson',
-                        dataType: 'json',
-                        data: null,
-                        cache: true,
-                        beforeSend: function (xhr) {
-                            if (xhr.overrideMimeType) {
-                                xhr.overrideMimeType("application/json");
-                            }
-                        }
-                    })
-                        .done(function (geojson) {
-                            map.addSource('selected', {
-                                'type': 'geojson',
-                                'data': geojson
+                            let center = [grid_row.longitude, grid_row.latitude]
+                            mapboxgl.accessToken = jsObject.map_key;
+                            let map = new mapboxgl.Map({
+                                container: 'single-map',
+                                style: 'mapbox://styles/mapbox/light-v10',
+                                center: center,
+                                minZoom: 2,
+                                maxZoom: 12,
+                                zoom: 3
                             });
-                            map.addLayer({
-                                'id': 'selected_fill',
-                                'type': 'fill',
-                                'source': 'selected',
-                                'paint': {
-                                    'fill-color': '#0080ff',
-                                    'fill-opacity': 0.75
-                                }
-                            });
-                            map.addLayer({
-                                'id': 'selected_line',
-                                'type': 'line',
-                                'source': 'selected',
-                                'paint': {
-                                    'line-color': 'black',
-                                    'line-width': 1
-                                }
-                            });
-                        })
-                    window.get_data_page( 'grid_row', grid_id )
-                        .done(function(grid_row) {
-                            if ( grid_row ) {
+                            map.dragRotate.disable();
+                            map.touchZoomRotate.disableRotation();
 
+                            map.on('load', function() {
                                 jQuery('#map-title').html(grid_row.full_name)
 
-                                map.fitBounds([
-                                    [parseFloat( grid_row.west_longitude), parseFloat(grid_row.south_latitude)], // southwestern corner of the bounds
-                                    [parseFloat(grid_row.east_longitude), parseFloat(grid_row.north_latitude)] // northeastern corner of the bounds
-                                ]);
+                                jQuery.ajax({
+                                    url: jsObject.mirror_url + 'collection/'+grid_row.parent_id+'.geojson',
+                                    dataType: 'json',
+                                    data: null,
+                                    cache: true,
+                                    beforeSend: function (xhr) {
+                                        if (xhr.overrideMimeType) {
+                                            xhr.overrideMimeType("application/json");
+                                        }
+                                    }
+                                })
+                                    .done(function (geojson) {
+                                        map.addSource('parent_collection', {
+                                            'type': 'geojson',
+                                            'data': geojson
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_lines',
+                                            'type': 'line',
+                                            'source': 'parent_collection',
+                                            'paint': {
+                                                'line-color': '#0080ff',
+                                                'line-width': 1
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill',
+                                            'type': 'fill',
+                                            'source': 'parent_collection',
+                                            'filter': [ '==', ['get', 'grid_id'], grid_row.grid_id ],
+                                            'paint': {
+                                                'fill-color': '#0080ff',
+                                                'fill-opacity': 0.75
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill_click',
+                                            'type': 'fill',
+                                            'source': 'parent_collection',
+                                            'paint': {
+                                                'fill-color': 'white',
+                                                'fill-opacity': 0
+                                            }
+                                        });
 
-                                // zoom to parent bbox
+                                        map.on('click', 'parent_collection_fill_click', function (e) {
+                                            new mapboxgl.Popup()
+                                                .setLngLat(e.lngLat)
+                                                .setHTML(e.features[0].properties.full_name)
+                                                .addTo(map);
+                                        });
+                                        map.on('mouseenter', 'parent_collection_fill_click', function () {
+                                            map.getCanvas().style.cursor = 'pointer';
+                                        });
 
-                                // highlight selected polygon
+                                        map.on('mouseleave', 'parent_collection_fill_click', function () {
+                                            map.getCanvas().style.cursor = '';
+                                        });
 
-                                // fly zoom to selected polygon
+                                        map.fitBounds([
+                                            [parseFloat( grid_row.west_longitude), parseFloat(grid_row.south_latitude)], // southwestern corner of the bounds
+                                            [parseFloat(grid_row.east_longitude), parseFloat(grid_row.north_latitude)] // northeastern corner of the bounds
+                                        ], {padding: 25});
 
-                                // load all children into parent
+                                    })
 
+                            }) // map load
 
-                                jQuery('.loading-spinner').removeClass('active')
-                            }
-                        })
-                })
+                            jQuery('.loading-spinner').removeClass('active')
+                        }
+                    })
+
+                window.get_data_page( 'grid_context', grid_id )
+                    .done(function(context) {
+                        console.log(context)
+                        if ( context ) {
+                            let self_column = jQuery('#self_column')
+                            let peers_column = jQuery('#peers_column')
+                            let children_column = jQuery('#children_column')
+
+                            jQuery.each( context.self, function(i,v){
+                                self_column.append(`<tr><td>${i}</td><td>${v}</td></tr>`)
+                            })
+                            jQuery.each( context.peers, function(i,v){
+                                peers_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+                            jQuery.each( context.children, function(i,v){
+                                children_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+
+                            jQuery('#data-section span').on('click', function(){
+                                let peer_grid_id = jQuery(this).data('id')
+                                load_single_map( peer_grid_id )
+                            })
+
+                        }
+                    })
+
             }
 
             function load_flat_grid_map( action, data ) {
@@ -1011,6 +1081,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                 <th>Country Code</th>
                                 <th>Level</th>
                                 <th>Population</th>
+                                <th style="width:25px">Map</th>
                             </tr>
                         </thead>
                         <tbody id="table-list"></tbody>
@@ -1018,14 +1089,20 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 let table_list = jQuery('#table-list')
                 let html = ''
                 jQuery.each( data, function(i,v){
-                    html +=  `<tr><td>${v.grid_id}</td><td>${v.full_name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.formatted_population}</td></tr>`
+                    html +=  `<tr><td>${v.grid_id}</td><td>${v.full_name}</td><td>${v.country_code}</td><td>${v.level}</td><td>${v.formatted_population}</td><td><img class="map-icon" src="${jsObject.map_marker}" onclick="show_map( ${v.grid_id} )" /></td></tr>`
                 })
 
                 table_list.append(html)
 
                 jQuery('#summary-table').dataTable({
-                    "paging": false
+                    "paging": true
                 });
+
+
+                // jQuery('.show_map').on('click', function(){
+                //     let grid_id = jQuery(this).data('id')
+                //     load_single_map( grid_id )
+                // })
             }
 
             function load_population_difference(action, data) {
@@ -1037,6 +1114,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         <thead>
                             <tr>
                                 <th>Name</th>
+                                <th style="width:25px;">Map</th>
                                 <th>Country Code</th>
                                 <th>Population</th>
                                 <th>Flat Population</th>
@@ -1050,6 +1128,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 jQuery.each( data, function(i,v){
                     table_list.append(`<tr class="country_selection" data-id="${v.country_code}" data-name="${v.name}">
                                         <td>${v.name}</td>
+                                        <td><img class="map-icon show_map" src="${jsObject.map_marker}" data-id="${v.grid_id}" /></td>
                                         <td>${v.country_code}</td>
                                         <td>${numberWithCommas(v.population)}</td>
                                         <td>${numberWithCommas(v.sum_population)}</td>
@@ -1074,12 +1153,16 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                             load_panel( 'flat_grid_by_country', data, name )
                         })
                 })
+
+                jQuery('.show_map').on('click', function(){
+                    let grid_id = jQuery(this).data('id')
+                    load_single_map( grid_id )
+                })
             }
 
             function load_flat_grid_by_country(action, data, title) {
                 let content = jQuery('#reveal-content-2')
                 content.empty().html(`
-                    <style>.social-icon { height: 20px; padding: 2px; cursor:pointer;}</style>
                     <style class="local-style-2">.verified-2 {display:none;}</style>
                     <h1>Flat Grid - <span id="country_code-2">${title}</span> <button class="button tiny hollow" style="position:absolute; top:10px; right:150px;" id="show_verified-2">show verified</button></h1>
                     <table class="hover display" id="summary-table-2">
@@ -1107,8 +1190,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                             <td id="population_${v.grid_id}-2">${v.formatted_population}</td>
                             <td><input type="text" class="input"  data-id="${v.grid_id}" data-old="${v.population}" /></td>
                             <td id="verified_${v.grid_id}-2">${check}</td>
-                            <td><img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
-                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/></td>
+                            <td>
+                                <img class="map-icon show_map" src="${jsObject.map_marker}" data-id="${v.grid_id}" />
+                                <img class="social-icon" src="${jsObject.google_logo}" data-url="https://www.google.com/search?q=${encodeURIComponent(v.full_name)}+population" />
+                                <img class="social-icon" src="${jsObject.wikipedia_logo}" data-url="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(v.full_name)}"/>
+                            </td>
                             <td>${v.level}</td>
                         </tr>`
                     )
@@ -1156,6 +1242,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         window.show_verified = false
                         jQuery('.local-style-2').html(` `)
                     }
+                })
+
+                jQuery('.show_map').on('click', function(){
+                    let grid_id = jQuery(this).data('id')
+                    load_single_map( grid_id )
                 })
             }
 
@@ -1470,19 +1561,19 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
         <div class="reveal full" id="modal" data-v-offset="0" data-multiple-opened="true" data-reveal>
             <div id="reveal-content"></div>
             <button class="close-button" data-close aria-label="Close modal" type="button">
-                <span aria-hidden="true">Close &times;</span>
+                <span aria-hidden="true">Back</span>
             </button>
         </div>
         <div class="reveal full" id="modal-2" data-v-offset="0" data-multiple-opened="true" data-reveal>
             <div id="reveal-content-2"></div>
             <button class="close-button" data-close aria-label="Close modal" type="button">
-                <span aria-hidden="true">Close &times;</span>
+                <span aria-hidden="true">Back</span>
             </button>
         </div>
         <div class="reveal full" id="modal-map" data-v-offset="0" data-multiple-opened="true" data-reveal>
             <div id="reveal-content-map"></div>
             <button class="close-button" data-close aria-label="Close modal" type="button">
-                <span aria-hidden="true">Close &times;</span>
+                <span aria-hidden="true">Back</span>
             </button>
         </div>
         <?php
@@ -1563,6 +1654,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::search_map_query( $params['data'] );
             case 'grid_row':
                 return Location_Grid_Queries::grid_row( $params['data'] );
+            case 'grid_context':
+                return Location_Grid_Queries::grid_context( $params['data'] );
 
             default:
                 return new WP_Error( __METHOD__, "Missing valid action", [ 'status' => 400 ] );

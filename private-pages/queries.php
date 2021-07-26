@@ -580,6 +580,7 @@ class Location_Grid_Queries {
         global $wpdb;
         $data = $wpdb->get_results("
             SELECT
+                tb.grid_id,
                 tb.name,
                 tb.country_code,
                 FORMAT( tb.population, 0) as population,
@@ -588,6 +589,7 @@ class Location_Grid_Queries {
                 TRUNCATE( ( ( tb.sum_population - tb.population ) / tb.population * 100 ), 1 )  as percent
             FROM (
                      SELECT
+                         l.grid_id,
                          l.name,
                          l.country_code,
                          l.population,
@@ -973,7 +975,7 @@ class Location_Grid_Queries {
                 parent.name as parent_name,
                 parent.longitude as parent_longitude,
                 parent.latitude as parent_name,
-                parent.north_latitude as parent_latitude,
+                parent.north_latitude as parent_north_latitude,
                 parent.south_latitude as parent_south_latitude,
                 parent.west_longitude as parent_west_longitude,
                 parent.east_longitude as parent_east_longitude
@@ -988,6 +990,134 @@ class Location_Grid_Queries {
                 WHERE lg.grid_id = %d;
             ", $grid_id
             ), ARRAY_A );
+
+        return $data;
+    }
+
+    public static function grid_context( $grid_id ) {
+        global $wpdb;
+
+        $self = $wpdb->get_row( $wpdb->prepare(
+            "SELECT lg.*,
+                    CASE
+                    WHEN lg.level = 0 THEN lg.name
+                    WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 3 THEN CONCAT( lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 4 THEN CONCAT( lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    ELSE CONCAT( lga5.name, ', ',lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    END as full_name
+                    FROM location_grid lg
+                    LEFT JOIN location_grid parent ON lg.parent_id=parent.grid_id
+                    LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+                    LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+                    LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+                    LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+                    LEFT JOIN location_grid lga4 ON lg.admin4_grid_id=lga4.grid_id
+                    LEFT JOIN location_grid lga5 ON lg.admin5_grid_id=lga5.grid_id
+                    WHERE lg.grid_id = %s"
+            , $grid_id)
+            , ARRAY_A );
+
+        $parent_id = $self['parent_id'];
+        $country_id = $self['admin0_grid_id'];
+
+        $parent = $wpdb->get_row( $wpdb->prepare(
+            "SELECT lg.*,
+                    CASE
+                    WHEN lg.level = 0 THEN lg.name
+                    WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 3 THEN CONCAT( lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 4 THEN CONCAT( lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    ELSE CONCAT( lga5.name, ', ',lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    END as full_name
+                    FROM location_grid lg
+                    LEFT JOIN location_grid parent ON lg.parent_id=parent.grid_id
+                    LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+                    LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+                    LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+                    LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+                    LEFT JOIN location_grid lga4 ON lg.admin4_grid_id=lga4.grid_id
+                    LEFT JOIN location_grid lga5 ON lg.admin5_grid_id=lga5.grid_id
+                    WHERE lg.grid_id = %s"
+            , $parent_id)
+            , ARRAY_A );
+
+        $country = $wpdb->get_row( $wpdb->prepare(
+            "SELECT lg.*,
+                    CASE
+                    WHEN lg.level = 0 THEN lg.name
+                    WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 3 THEN CONCAT( lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 4 THEN CONCAT( lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    ELSE CONCAT( lga5.name, ', ',lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    END as full_name
+                    FROM location_grid lg
+                    LEFT JOIN location_grid parent ON lg.parent_id=parent.grid_id
+                    LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+                    LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+                    LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+                    LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+                    LEFT JOIN location_grid lga4 ON lg.admin4_grid_id=lga4.grid_id
+                    LEFT JOIN location_grid lga5 ON lg.admin5_grid_id=lga5.grid_id
+                    WHERE lg.grid_id = %s"
+            , $country_id)
+            , ARRAY_A );
+
+        $peers = $wpdb->get_results( $wpdb->prepare(
+            "SELECT lg.grid_id,
+                   CASE
+                    WHEN lg.level = 0 THEN lg.name
+                    WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 3 THEN CONCAT( lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 4 THEN CONCAT( lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    ELSE CONCAT( lga5.name, ', ',lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    END as full_name
+                    FROM location_grid lg
+                    LEFT JOIN location_grid parent ON lg.parent_id=parent.grid_id
+                    LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+                    LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+                    LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+                    LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+                    LEFT JOIN location_grid lga4 ON lg.admin4_grid_id=lga4.grid_id
+                    LEFT JOIN location_grid lga5 ON lg.admin5_grid_id=lga5.grid_id
+                    WHERE lg.parent_id = %s"
+            , $parent_id)
+            , ARRAY_A );
+
+        $children = $wpdb->get_results( $wpdb->prepare(
+            "SELECT lg.grid_id,
+                   CASE
+                    WHEN lg.level = 0 THEN lg.name
+                    WHEN lg.level = 1 THEN CONCAT( lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 2 THEN CONCAT( lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 3 THEN CONCAT( lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    WHEN lg.level = 4 THEN CONCAT( lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    ELSE CONCAT( lga5.name, ', ',lga4.name, ', ',lga3.name, ', ',lga2.name, ', ', lga1.name, ', ', lga0.name )
+                    END as full_name
+                    FROM location_grid lg
+                    LEFT JOIN location_grid parent ON lg.parent_id=parent.grid_id
+                    LEFT JOIN location_grid lga0 ON lg.admin0_grid_id=lga0.grid_id
+                    LEFT JOIN location_grid lga1 ON lg.admin1_grid_id=lga1.grid_id
+                    LEFT JOIN location_grid lga2 ON lg.admin2_grid_id=lga2.grid_id
+                    LEFT JOIN location_grid lga3 ON lg.admin3_grid_id=lga3.grid_id
+                    LEFT JOIN location_grid lga4 ON lg.admin4_grid_id=lga4.grid_id
+                    LEFT JOIN location_grid lga5 ON lg.admin5_grid_id=lga5.grid_id
+                    WHERE lg.parent_id = %s"
+            , $grid_id)
+            , ARRAY_A );
+
+
+        $data = [
+            'country' => $country ?? [],
+          'parent' => $parent ?? [],
+          'self' => $self ?? [],
+          'peers' => $peers ?? [],
+          'children' => $children ?? [],
+        ];
 
         return $data;
     }
