@@ -1139,7 +1139,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 jQuery('#summary-table').dataTable({
                     "paging": false,
-                    "order": [ 4, 'desc' ]
+                    "order": [ 5, 'desc' ]
                 });
 
                 jQuery('.country_selection').on('click', function(e){
