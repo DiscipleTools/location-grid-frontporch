@@ -95,6 +95,7 @@ class Location_Grid_Porch {
         global $wpdb;
         $wpdb->location_grid = 'location_grid';
         $wpdb->location_grid_edit_log = 'location_grid_edit_log';
+        $wpdb->location_grid_groupings = 'location_grid_groupings';
 
         require_once( 'private-pages/queries.php' );
 

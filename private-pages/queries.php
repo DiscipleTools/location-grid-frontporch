@@ -165,6 +165,45 @@ class Location_Grid_Queries {
         ];
     }
 
+    public static function state_grid_populations() {
+        global $wpdb;
+        $data_raw = $wpdb->get_results("
+            SELECT
+                lg1.grid_id, lg1.name, lg1.population, lg1.country_code, lg1.level
+            FROM location_grid lg1
+            WHERE lg1.level = 0
+              AND lg1.grid_id NOT IN ( SELECT lg11.admin0_grid_id FROM location_grid lg11 WHERE lg11.level = 1 AND lg11.admin0_grid_id = lg1.grid_id )
+              AND lg1.admin0_grid_id NOT IN (100050711,100219347,100089589,100074576,100259978,100018514)
+            UNION ALL
+            SELECT
+                lg2.grid_id, lg2.name, lg2.population, lg2.country_code, lg2.level
+            FROM location_grid lg2
+            WHERE lg2.level = 1
+              AND lg2.admin0_grid_id NOT IN (100050711,100219347,100089589,100074576,100259978,100018514)
+            UNION ALL
+            SELECT
+                lg3.grid_id, lg3.name, lg3.population, lg3.country_code, lg3.level
+            FROM location_grid lg3
+            WHERE lg3.level = 2
+              AND lg3.admin0_grid_id IN (100050711,100219347,100089589,100074576,100259978,100018514)
+        ", ARRAY_A );
+
+        $data = [];
+        $highest_value = 1;
+        foreach ( $data_raw as $row ) {
+            $data[$row['grid_id']] = $row['population'];
+
+            if ( $highest_value < $row['population'] ){
+                $highest_value = $row['population'];
+            }
+        }
+
+        return [
+            'highest_value' => (int) $highest_value,
+            'data' => $data
+        ];
+    }
+
     public static function flat_grid_full() {
         global $wpdb;
         $data = $wpdb->get_results("

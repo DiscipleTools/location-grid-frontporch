@@ -12,7 +12,7 @@ if ( !defined( 'ABSPATH' ) ) {
 class LG_Migration_Engine
 {
 
-    public static $migration_number = 0;
+    public static $migration_number = 1;
 
     protected static $migrations = null;
 
