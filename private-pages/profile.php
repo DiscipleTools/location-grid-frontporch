@@ -1178,15 +1178,15 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                     $('.loading-spinner').removeClass('active')
 
-                    let center = [-98, 38.88]
+                    let center = [0, 0]
                     mapboxgl.accessToken = jsObject.map_key;
                     let map = new mapboxgl.Map({
                         container: 'map',
-                        style: 'mapbox://styles/mapbox/light-v10',
+                        style: 'mapbox://styles/mapbox/dark-v10',
                         center: center,
                         minZoom: 2,
                         maxZoom: 8,
-                        zoom: 3
+                        zoom: 1
                     });
                     map.dragRotate.disable();
                     map.touchZoomRotate.disableRotation();
@@ -1247,11 +1247,11 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                         'type': 'fill',
                                         'source': i.toString(),
                                         'paint': {
-                                            'fill-color': 'black',
+                                            'fill-color': 'red',
                                             'fill-opacity': [
                                                 'case',
                                                 ['boolean', ['feature-state', 'hover'], false],
-                                                .8,
+                                                .5,
                                                 0
                                             ]
                                         }
@@ -1268,10 +1268,10 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                                         'paint': {
                                             'fill-color': {
                                                 property: 'value',
-                                                stops: [[0, 'rgba(0, 0, 0, 0)'], [1, 'rgb(155, 200, 254)'], [jsObject.grid_data.highest_value, 'rgb(37, 82, 154)']]
+                                                stops: [[0, 'rgba(0, 0, 0, 0)'], [1, 'rgba(255, 255, 255, 1)'], [jsObject.grid_data.highest_value, 'rgba(255, 255, 255, 1)']]
                                             },
                                             'fill-opacity': 0.75,
-                                            'fill-outline-color': '#707070'
+                                            'fill-outline-color': 'black'
                                         }
                                     })
                                     /**********/
