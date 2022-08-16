@@ -206,10 +206,37 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         'class' => 'lightblue',
                         'permissions' => []
                     ],
-                    'search_map' => [
-                        'key' => 'search_map',
-                        'title' => 'Search Map',
-                        'description' => 'Search Map for a specific location',
+                    'search_collection_map' => [
+                        'key' => 'search_collection_map',
+                        'title' => 'Search Map (Collections)',
+                        'description' => 'Search Map for a specific location. Map with collection polygons.',
+                        'auto_load' => 0,
+                        'image' => '',
+                        'class' => 'lightblue',
+                        'permissions' => []
+                    ],
+                    'search_single_map' => [
+                        'key' => 'search_single_map',
+                        'title' => 'Search Map (Single)',
+                        'description' => 'Search Map for a specific location. Map with single polygons.',
+                        'auto_load' => 0,
+                        'image' => '',
+                        'class' => 'lightblue',
+                        'permissions' => []
+                    ],
+                    'search_single_map_high' => [
+                        'key' => 'search_single_map_high',
+                        'title' => 'Search Map (Single High)',
+                        'description' => 'Search Map for a specific location. Map with single polygons.',
+                        'auto_load' => 0,
+                        'image' => '',
+                        'class' => 'lightblue',
+                        'permissions' => []
+                    ],
+                    'search_single_collection_map' => [
+                        'key' => 'search_single_collection_map',
+                        'title' => 'Search Map (Single Collection)',
+                        'description' => 'Search Map for a specific location. Collection of single polygons.',
                         'auto_load' => 0,
                         'image' => '',
                         'class' => 'lightblue',
@@ -399,17 +426,26 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     case 'flat_states_map':
                         load_flat_states_map()
                         break;
-                    case 'search_map':
-                        load_search_map()
+                    case 'search_collection_map':
+                        search_widget( 'Collection' )
+                        break;
+                    case 'search_single_map':
+                        search_widget( 'Single-Low' )
+                        break;
+                    case 'search_single_map_high':
+                        search_widget( 'Single-High' )
+                        break;
+                    case 'search_single_collection_map':
+                        search_widget( 'Collection-of-Singles' )
                         break;
                     case 'test_map':
-                        load_single_map( 100364508 )
+                        load_single_map_low( 100364508 )
                         break;
                 }
             }
 
             function show_map( grid_id ) {
-                load_single_map( grid_id )
+                load_single_map_low( grid_id )
             }
 
             function load_summary( action, data ) {
@@ -438,7 +474,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 });
             }
 
-            function load_search_map() {
+            function search_widget( polygon = 'Collections' ) {
+                window.polygon = polygon
                 let countries = [<?php
                     $countries = $wpdb->get_results("SELECT name, country_code FROM location_grid WHERE level = 0 ORDER BY name;", ARRAY_A);
                     echo json_encode($countries) ?>][0]
@@ -451,7 +488,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 let content = jQuery('#reveal-content')
                 content.empty().html(`
-                    <h1>Search Map</h1>
+                    <h1>Search Map ( ${polygon} )</h1>
                     <div class="grid-x grid-padding-x">
                         <div class="cell medium-3">
                             <div class="grid-x grid-padding-x">
@@ -601,14 +638,23 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                             jQuery('#table-list tr').on('click', function(){
                                 let grid_id = jQuery(this).data('id')
-                                load_single_map( grid_id )
+                                if ( 'Collection' === window.polygon ){
+                                    load_collection_map( grid_id )
+                                } else if ( 'Single-Low' === window.polygon ) {
+                                    load_single_map_low( grid_id )
+                                } else if ( 'Single-High' === window.polygon ) {
+                                    load_single_map_high( grid_id )
+                                } else if ( 'Collection-of-Singles' === window.polygon ) {
+                                    load_collection_of_single_map( grid_id )
+                                }
+
                             })
                         })
                 }
 
             }
 
-            function load_single_map( grid_id ) {
+            function load_collection_map( grid_id ) {
                 let content = jQuery('#reveal-content-map')
                 content.html(`<span class="loading-spinner active"></span>`)
                 jQuery('#modal-map').foundation('open')
@@ -661,7 +707,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                         console.log( grid_row )
                         if ( grid_row ) {
                             jQuery('#uplevel').on('click', function(){
-                                load_single_map( grid_row.parent_id )
+                                load_single_map_low( grid_row.parent_id )
                             })
 
                             let center = [grid_row.longitude, grid_row.latitude]
@@ -772,8 +818,550 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                             jQuery('#data-section span').on('click', function(){
                                 let peer_grid_id = jQuery(this).data('id')
-                                load_single_map( peer_grid_id )
+                                load_single_map_low( peer_grid_id )
                             })
+
+                        }
+                    })
+
+            }
+
+            function load_single_map_low( grid_id ) {
+                let content = jQuery('#reveal-content-map')
+                content.html(`<span class="loading-spinner active"></span>`)
+                jQuery('#modal-map').foundation('open')
+
+                content.empty().html(`
+                    <style id="map-style"></style>
+                    <h1 ><span id="map-title"><span class="loading-spinner active"></span></span> <button class="button small" id="uplevel">Up Level</button></h1>
+                    <div class="grid-x grid-padding-x" style="margin-bottom:1em;">
+                        <div class="cell" id="map-container">
+                           <div id="map-wrapper" >
+                                <div id='single-map'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-x grid-padding-x" id="data-section">
+                        <div class="cell medium-4">
+                             <h2>Self</h2>
+                            <span class="loading-spinner active"></span>
+                            <table><tbody id="self_column"></tbody></table>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                            <h2>Peers</h2>
+                            <div id="peers_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                             <h2>Children</h2>
+                            <div id="children_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                    </div>
+                `)
+
+                jQuery('#map-style').empty().append(`
+                        #wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #map-wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #single-map {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #data-section span {
+                            color: blue;
+                            cursor: pointer;
+                        }
+                    `)
+
+                window.get_data_page( 'grid_row', grid_id )
+                    .done(function(grid_row) {
+                        console.log( grid_row )
+                        if ( grid_row ) {
+                            jQuery('#uplevel').on('click', function(){
+                                load_single_map_low( grid_row.parent_id )
+                            })
+
+                            let center = [grid_row.longitude, grid_row.latitude]
+                            mapboxgl.accessToken = jsObject.map_key;
+                            let map = new mapboxgl.Map({
+                                container: 'single-map',
+                                style: 'mapbox://styles/mapbox/light-v10',
+                                center: center,
+                                minZoom: 2,
+                                maxZoom: 12,
+                                zoom: 3
+                            });
+                            map.dragRotate.disable();
+                            map.touchZoomRotate.disableRotation();
+
+                            map.on('load', function() {
+                                jQuery('#map-title').html(grid_row.full_name)
+
+                                jQuery.ajax({
+                                    url: jsObject.mirror_url + 'low/'+grid_row.grid_id+'.geojson',
+                                    dataType: 'json',
+                                    data: null,
+                                    cache: true,
+                                    beforeSend: function (xhr) {
+                                        if (xhr.overrideMimeType) {
+                                            xhr.overrideMimeType("application/json");
+                                        }
+                                    }
+                                })
+                                    .done(function (geojson) {
+                                        map.addSource('parent_collection', {
+                                            'type': 'geojson',
+                                            'data': geojson
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_lines',
+                                            'type': 'line',
+                                            'source': 'parent_collection',
+                                            'paint': {
+                                                'line-color': '#0080ff',
+                                                'line-width': 1
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill',
+                                            'type': 'fill',
+                                            'source': 'parent_collection',
+                                            'filter': [ '==', ['get', 'grid_id'], grid_row.grid_id ],
+                                            'paint': {
+                                                'fill-color': '#0080ff',
+                                                'fill-opacity': 0.75
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill_click',
+                                            'type': 'fill',
+                                            'source': 'parent_collection',
+                                            'paint': {
+                                                'fill-color': 'white',
+                                                'fill-opacity': 0
+                                            }
+                                        });
+
+                                        map.on('click', 'parent_collection_fill_click', function (e) {
+                                            new mapboxgl.Popup()
+                                                .setLngLat(e.lngLat)
+                                                .setHTML(e.features[0].properties.full_name)
+                                                .addTo(map);
+                                        });
+                                        map.on('mouseenter', 'parent_collection_fill_click', function () {
+                                            map.getCanvas().style.cursor = 'pointer';
+                                        });
+
+                                        map.on('mouseleave', 'parent_collection_fill_click', function () {
+                                            map.getCanvas().style.cursor = '';
+                                        });
+
+                                        map.fitBounds([
+                                            [parseFloat( grid_row.west_longitude), parseFloat(grid_row.south_latitude)], // southwestern corner of the bounds
+                                            [parseFloat(grid_row.east_longitude), parseFloat(grid_row.north_latitude)] // northeastern corner of the bounds
+                                        ], {padding: 25});
+
+                                    })
+
+                            }) // map load
+
+                            jQuery('.loading-spinner').removeClass('active')
+                        }
+                    })
+
+                window.get_data_page( 'grid_context', grid_id )
+                    .done(function(context) {
+                        console.log(context)
+                        if ( context ) {
+                            let self_column = jQuery('#self_column')
+                            let peers_column = jQuery('#peers_column')
+                            let children_column = jQuery('#children_column')
+
+                            jQuery.each( context.self, function(i,v){
+                                self_column.append(`<tr><td>${i}</td><td>${v}</td></tr>`)
+                            })
+                            jQuery.each( context.peers, function(i,v){
+                                peers_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+                            jQuery.each( context.children, function(i,v){
+                                children_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+
+                            jQuery('#data-section span').on('click', function(){
+                                let peer_grid_id = jQuery(this).data('id')
+                                load_single_map_low( peer_grid_id )
+                            })
+
+                        }
+                    })
+
+            }
+
+            function load_single_map_high( grid_id ) {
+                let content = jQuery('#reveal-content-map')
+                content.html(`<span class="loading-spinner active"></span>`)
+                jQuery('#modal-map').foundation('open')
+
+                content.empty().html(`
+                    <style id="map-style"></style>
+                    <h1 ><span id="map-title"><span class="loading-spinner active"></span></span> <button class="button small" id="uplevel">Up Level</button></h1>
+                    <div class="grid-x grid-padding-x" style="margin-bottom:1em;">
+                        <div class="cell" id="map-container">
+                           <div id="map-wrapper" >
+                                <div id='single-map'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-x grid-padding-x" id="data-section">
+                        <div class="cell medium-4">
+                             <h2>Self</h2>
+                            <span class="loading-spinner active"></span>
+                            <table><tbody id="self_column"></tbody></table>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                            <h2>Peers</h2>
+                            <div id="peers_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                             <h2>Children</h2>
+                            <div id="children_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                    </div>
+                `)
+
+                jQuery('#map-style').empty().append(`
+                        #wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #map-wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #single-map {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #data-section span {
+                            color: blue;
+                            cursor: pointer;
+                        }
+                    `)
+
+                window.get_data_page( 'grid_row', grid_id )
+                    .done(function(grid_row) {
+                        console.log( grid_row )
+                        if ( grid_row ) {
+                            jQuery('#uplevel').on('click', function(){
+                                load_single_map_high( grid_row.parent_id )
+                            })
+
+                            let center = [grid_row.longitude, grid_row.latitude]
+                            mapboxgl.accessToken = jsObject.map_key;
+                            let map = new mapboxgl.Map({
+                                container: 'single-map',
+                                style: 'mapbox://styles/mapbox/light-v10',
+                                center: center,
+                                minZoom: 2,
+                                maxZoom: 12,
+                                zoom: 3
+                            });
+                            map.dragRotate.disable();
+                            map.touchZoomRotate.disableRotation();
+
+                            map.on('load', function() {
+                                jQuery('#map-title').html(grid_row.full_name)
+
+                                jQuery.ajax({
+                                    url: jsObject.mirror_url + 'high/'+grid_row.grid_id+'.geojson',
+                                    dataType: 'json',
+                                    data: null,
+                                    cache: true,
+                                    beforeSend: function (xhr) {
+                                        if (xhr.overrideMimeType) {
+                                            xhr.overrideMimeType("application/json");
+                                        }
+                                    }
+                                })
+                                    .done(function (geojson) {
+                                        map.addSource('parent_collection', {
+                                            'type': 'geojson',
+                                            'data': geojson
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_lines',
+                                            'type': 'line',
+                                            'source': 'parent_collection',
+                                            'paint': {
+                                                'line-color': '#0080ff',
+                                                'line-width': 1
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill',
+                                            'type': 'fill',
+                                            'source': 'parent_collection',
+                                            'filter': [ '==', ['get', 'grid_id'], grid_row.grid_id ],
+                                            'paint': {
+                                                'fill-color': '#0080ff',
+                                                'fill-opacity': 0.75
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill_click',
+                                            'type': 'fill',
+                                            'source': 'parent_collection',
+                                            'paint': {
+                                                'fill-color': 'white',
+                                                'fill-opacity': 0
+                                            }
+                                        });
+
+                                        map.on('click', 'parent_collection_fill_click', function (e) {
+                                            new mapboxgl.Popup()
+                                                .setLngLat(e.lngLat)
+                                                .setHTML(e.features[0].properties.full_name)
+                                                .addTo(map);
+                                        });
+                                        map.on('mouseenter', 'parent_collection_fill_click', function () {
+                                            map.getCanvas().style.cursor = 'pointer';
+                                        });
+
+                                        map.on('mouseleave', 'parent_collection_fill_click', function () {
+                                            map.getCanvas().style.cursor = '';
+                                        });
+
+                                        map.fitBounds([
+                                            [parseFloat( grid_row.west_longitude), parseFloat(grid_row.south_latitude)], // southwestern corner of the bounds
+                                            [parseFloat(grid_row.east_longitude), parseFloat(grid_row.north_latitude)] // northeastern corner of the bounds
+                                        ], {padding: 25});
+
+                                    })
+
+                            }) // map load
+
+                            jQuery('.loading-spinner').removeClass('active')
+                        }
+                    })
+
+                window.get_data_page( 'grid_context', grid_id )
+                    .done(function(context) {
+                        console.log(context)
+                        if ( context ) {
+                            let self_column = jQuery('#self_column')
+                            let peers_column = jQuery('#peers_column')
+                            let children_column = jQuery('#children_column')
+
+                            jQuery.each( context.self, function(i,v){
+                                self_column.append(`<tr><td>${i}</td><td>${v}</td></tr>`)
+                            })
+                            jQuery.each( context.peers, function(i,v){
+                                peers_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+                            jQuery.each( context.children, function(i,v){
+                                children_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+
+                            jQuery('#data-section span').on('click', function(){
+                                let peer_grid_id = jQuery(this).data('id')
+                                load_single_map_high( peer_grid_id )
+                            })
+
+                        }
+                    })
+
+            }
+
+            function load_collection_of_single_map( grid_id ) {
+                let content = jQuery('#reveal-content-map')
+                content.html(`<span class="loading-spinner active"></span>`)
+                jQuery('#modal-map').foundation('open')
+
+                content.empty().html(`
+                    <style id="map-style"></style>
+                    <h1 ><span id="map-title"><span class="loading-spinner active"></span></span> <button class="button small" id="uplevel">Up Level</button></h1>
+                    <div class="grid-x grid-padding-x" style="margin-bottom:1em;">
+                        <div class="cell" id="map-container">
+                           <div id="map-wrapper" >
+                                <div id='single-map'></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-x grid-padding-x" id="data-section">
+                        <div class="cell medium-4">
+                             <h2>Self</h2>
+                            <span class="loading-spinner active"></span>
+                            <table><tbody id="self_column"></tbody></table>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                            <h2>Peers</h2>
+                            <div id="peers_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                        <div class="cell medium-4" style="border-left: 1px solid lightgrey">
+                             <h2>Children</h2>
+                            <div id="children_column"><span class="loading-spinner active"></span></div>
+                        </div>
+                    </div>
+                `)
+
+                jQuery('#map-style').empty().append(`
+                        #wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #map-wrapper {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #single-map {
+                            height: ${window.innerHeight / 2}px !important;
+                        }
+                        #data-section span {
+                            color: blue;
+                            cursor: pointer;
+                        }
+                    `)
+
+
+                window.get_data_page( 'grid_context', grid_id )
+                    .done(function(context) {
+                        console.log(context)
+                        if ( context ) {
+                            let self_column = jQuery('#self_column')
+                            let peers_column = jQuery('#peers_column')
+                            let children_column = jQuery('#children_column')
+
+                            jQuery.each( context.self, function(i,v){
+                                self_column.append(`<tr><td>${i}</td><td>${v}</td></tr>`)
+                            })
+                            jQuery.each( context.peers, function(i,v){
+                                peers_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+                            jQuery.each( context.children, function(i,v){
+                                children_column.append(`<span data-id="${v.grid_id}">${v.full_name}</span><br>`)
+                            })
+
+                            jQuery('#data-section span').on('click', function(){
+                                let peer_grid_id = jQuery(this).data('id')
+                                load_collection_of_single_map( peer_grid_id )
+                            })
+                            jQuery('#uplevel').on('click', function(){
+                                load_collection_of_single_map( context.self.parent_id )
+                            })
+
+                            let center = [context.self.longitude, context.self.latitude]
+                            mapboxgl.accessToken = jsObject.map_key;
+                            let map = new mapboxgl.Map({
+                                container: 'single-map',
+                                style: 'mapbox://styles/mapbox/light-v10',
+                                center: center,
+                                minZoom: 2,
+                                maxZoom: 12,
+                                zoom: 3
+                            });
+                            map.dragRotate.disable();
+                            map.touchZoomRotate.disableRotation();
+
+                            map.fitBounds([
+                                [parseFloat( context.self.west_longitude), parseFloat(context.self.south_latitude)], // southwestern corner of the bounds
+                                [parseFloat(context.self.east_longitude), parseFloat(context.self.north_latitude)] // northeastern corner of the bounds
+                            ], {padding: 25});
+
+                            map.on('load', function() {
+                                jQuery('#map-title').html(context.self.full_name)
+
+                                jQuery.each( context.children, function(i, grid_row ) {
+
+                                    jQuery.ajax({
+                                        url: jsObject.mirror_url + 'low/'+grid_row.grid_id+'.geojson',
+                                        dataType: 'json',
+                                        data: null,
+                                        cache: true,
+                                        beforeSend: function (xhr) {
+                                            if (xhr.overrideMimeType) {
+                                                xhr.overrideMimeType("application/json");
+                                            }
+                                        }
+                                    })
+                                        .done(function (geojson) {
+                                            map.addSource('parent_collection'+i, {
+                                                'type': 'geojson',
+                                                'data': geojson
+                                            });
+                                            map.addLayer({
+                                                'id': 'parent_collection_lines'+i,
+                                                'type': 'line',
+                                                'source': 'parent_collection'+i,
+                                                'paint': {
+                                                    'line-color': '#0080ff',
+                                                    'line-width': 1
+                                                }
+                                            });
+
+                                            map.addLayer({
+                                                'id': 'parent_collection_fill_click'+i,
+                                                'type': 'fill',
+                                                'source': 'parent_collection'+i,
+                                                'paint': {
+                                                    'fill-color': 'white',
+                                                    'fill-opacity': 0
+                                                }
+                                            });
+
+                                            map.on('click', 'parent_collection_fill_click'+i, function (e) {
+                                                new mapboxgl.Popup()
+                                                    .setLngLat(e.lngLat)
+                                                    .setHTML(e.features[0].properties.full_name)
+                                                    .addTo(map);
+                                            });
+                                            map.on('mouseenter', 'parent_collection_fill_click'+i, function () {
+                                                map.getCanvas().style.cursor = 'pointer';
+                                            });
+
+                                            map.on('mouseleave', 'parent_collection_fill_click'+i, function () {
+                                                map.getCanvas().style.cursor = '';
+                                            });
+
+                                        })
+                                } )
+
+                                jQuery.ajax({
+                                    url: jsObject.mirror_url + 'high/'+content.self.grid_id+'.geojson',
+                                    dataType: 'json',
+                                    data: null,
+                                    cache: true,
+                                    beforeSend: function (xhr) {
+                                        if (xhr.overrideMimeType) {
+                                            xhr.overrideMimeType("application/json");
+                                        }
+                                    }
+                                })
+                                    .done(function (geojson) {
+                                        map.addSource('parent_collection_self', {
+                                            'type': 'geojson',
+                                            'data': geojson
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_lines_self',
+                                            'type': 'line',
+                                            'source': 'parent_collection_self',
+                                            'paint': {
+                                                'line-color': '#0080ff',
+                                                'line-width': 1
+                                            }
+                                        });
+                                        map.addLayer({
+                                            'id': 'parent_collection_fill_self',
+                                            'type': 'fill',
+                                            'source': 'parent_collection_self',
+                                            'paint': {
+                                                'fill-color': '#0080ff',
+                                                'fill-opacity': 0.6
+                                            }
+                                        });
+                                    })
+
+
+
+                            }) // map load
+
+                            jQuery('.loading-spinner').removeClass('active')
 
                         }
                     })
@@ -1374,11 +1962,6 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                     "paging": true
                 });
 
-
-                // jQuery('.show_map').on('click', function(){
-                //     let grid_id = jQuery(this).data('id')
-                //     load_single_map( grid_id )
-                // })
             }
 
             function load_population_difference(action, data) {
@@ -1432,7 +2015,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 jQuery('.show_map').on('click', function(){
                     let grid_id = jQuery(this).data('id')
-                    load_single_map( grid_id )
+                    load_single_map_low( grid_id )
                 })
             }
 
@@ -1522,7 +2105,7 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
 
                 jQuery('.show_map').on('click', function(){
                     let grid_id = jQuery(this).data('id')
-                    load_single_map( grid_id )
+                    load_single_map_low( grid_id )
                 })
             }
 
@@ -1932,6 +2515,8 @@ class LG_Public_Porch_Profile extends DT_Magic_Url_Base {
                 return Location_Grid_Queries::search_map_query( $params['data'] );
             case 'grid_row':
                 return Location_Grid_Queries::grid_row( $params['data'] );
+            case 'grid_children':
+                return Location_Grid_Queries::grid_children( $params['data'] );
             case 'grid_context':
                 return Location_Grid_Queries::grid_context( $params['data'] );
 
